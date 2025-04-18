@@ -24,11 +24,20 @@ module GtfsCache
         end
       end
 
+      def gtfs_realtime_alerts
+        store.fetch("gtfs_realtime_alerts", expires_in: 15.seconds) do
+          Net::HTTP.get(
+            URI.parse("https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-alerts/v2"),
+            { "Authorization" => CREDENTIALS.swiftly_api_key }
+          )
+        end
+      end
+
       def gtfs_realtime_trip_updates
         store.fetch("gtfs_realtime_trip_updates", expires_in: 15.seconds) do
           Net::HTTP.get(
             URI.parse("https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-trip-updates"),
-            { 'Authorization' => CREDENTIALS.swiftly_api_key }
+            { "Authorization" => CREDENTIALS.swiftly_api_key }
           )
         end
       end

@@ -37,14 +37,54 @@ RSpec.describe GtfsCache do
     end
   end
 
+  describe "GET /gtfs-rt/alerts" do
+    subject(:call) { get "/gtfs-rt/alerts" }
+
+    context "when data has not been cached" do
+      before do
+        allow(CREDENTIALS).to receive(:swiftly_api_key).and_return("test-api-key")
+        stub_request(:get, "https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-alerts/v2")
+          .with(headers: { "Authorization" => "test-api-key" })
+          .to_return(body: "server data")
+      end
+
+      it "responds with an ok status" do
+        call
+        expect(last_response.status).to eq(200)
+      end
+
+      it "responds with data from the public gtfs feed" do
+        call
+        expect(last_response.body).to eq("server data")
+      end
+    end
+
+    context "when data has been cached" do
+      before do
+        allow(GtfsCache::Cache.store).to receive(:fetch).with("gtfs_realtime_alerts", any_args)
+                                                        .and_return("cache data")
+      end
+
+      it "responds with an ok status" do
+        call
+        expect(last_response.status).to eq(200)
+      end
+
+      it "responds with the cached data" do
+        call
+        expect(last_response.body).to eq("cache data")
+      end
+    end
+  end
+
   describe "GET /gtfs-rt/trip-updates" do
     subject(:call) { get "/gtfs-rt/trip-updates" }
 
     context "when data has not been cached" do
       before do
-        allow(CREDENTIALS).to receive(:swiftly_api_key).and_return('test-api-key')
+        allow(CREDENTIALS).to receive(:swiftly_api_key).and_return("test-api-key")
         stub_request(:get, "https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-trip-updates")
-          .with(headers: { 'Authorization' => 'test-api-key' })
+          .with(headers: { "Authorization" => "test-api-key" })
           .to_return(body: "server data")
       end
 
