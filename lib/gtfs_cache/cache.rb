@@ -4,12 +4,17 @@ module GtfsCache
   module Cache
     class << self
       def store
-        @store ||= if ENV.fetch("RACK_ENV", "development") == "test"
-                     ActiveSupport::Cache::NullStore.new
-                   else
+        @store ||= case ENV.fetch("RACK_ENV", "development")
+                   when "production"
                      # :nocov:
                      ActiveSupport::Cache::FileStore.new(Pathname(__dir__).join("../../tmp/cache").expand_path)
                      # :nocov:
+                   when "development"
+                     # :nocov:
+                     ActiveSupport::Cache::MemoryStore.new
+                     # :nocov:
+                   else
+                     ActiveSupport::Cache::NullStore.new
                    end
       end
 
