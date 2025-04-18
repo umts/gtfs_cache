@@ -23,6 +23,15 @@ module GtfsCache
           Net::HTTP.get(URI.parse("https://www.pvta.com/g_trans/google_transit.zip"))
         end
       end
+
+      def gtfs_realtime_trip_updates
+        store.fetch("gtfs_realtime_trip_updates", expires_in: 15.seconds) do
+          Net::HTTP.get(
+            URI.parse("https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-trip-updates"),
+            { 'Authorization' => CREDENTIALS.swiftly_api_key }
+          )
+        end
+      end
     end
   end
 end

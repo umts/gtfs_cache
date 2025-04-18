@@ -9,6 +9,10 @@ module GtfsCache
       Cache.gtfs
     end
 
+    get "/gtfs-rt/trip-updates" do
+      Cache.gtfs_realtime_trip_updates
+    end
+
     get "/up" do
       200
     end
