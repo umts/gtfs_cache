@@ -1,8 +1,13 @@
 # gtfs_cache
 
-TODO: Fill out.
+A simple webserver that makes the PVTA's GTFS and GTFS Realtime datasets available publicly.
 
-`time_at_insertion` is the time that it made it into the database.
+When requests are received for GTFS data, the web server will forward it to the appropriate source
+([the PVTA itself](https://www.pvta.com/g_trans/) for GTFS, [Swiftly](https://www.goswift.ly) for GTFS Realtime),
+then cache the response before sending it back to the original requester.
+
+This gets us around various access control pain points (CORS for the PVTA, API keys/rate limits for Swiftly) when
+using these datasets in our other applications.
 
 ## Development
 
