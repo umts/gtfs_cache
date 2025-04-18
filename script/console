@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require_relative "../config/environment"
+require "gtfs_cache"
+require "irb"
+
+$stdout.sync = true
+IRB.setup nil
+IRB.conf.tap do |c|
+  prompt = c[:PROMPT][:DEFAULT].dup
+  prompt[:RETURN] = "##{prompt[:RETURN]}"
+
+  c[:IRB_NAME] = "fleetfocus-api"
+  c[:PROMPT][:CUSTOM] = prompt
+  c[:PROMPT_MODE] = :CUSTOM
+end
+
+IRB::Irb.new.run(IRB.conf)

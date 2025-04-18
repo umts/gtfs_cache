@@ -5,6 +5,7 @@ gem "puma", require: false
 gem "sinatra", require: "sinatra/base"
 
 group :development do
+  gem "irb", require: false
   gem "rubocop", require: false
   gem "rubocop-rspec", require: false
 end
