@@ -2,3 +2,4 @@
 /log/
 /spec/examples.txt
 /tmp/
+*.key
