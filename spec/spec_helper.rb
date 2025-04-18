@@ -6,6 +6,9 @@ SimpleCov.start do
   minimum_coverage line: 100, branch: 100
 end
 
+ENV["RACK_ENV"] = "test"
+require_relative "../config/environment"
+
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
