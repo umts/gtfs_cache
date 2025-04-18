@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+gem install bundler --conservative
+if ! bundle check; then bundle install; fi
+if command -v rbenv &> /dev/null; then rbenv rehash; fi
