@@ -1,0 +1,11 @@
+*
+
+!/config/
+!/lib/
+!/script/server
+!/.ruby-version
+!/config.ru
+!/Gemfile
+!/Gemfile.lock
+
+**/*.key
