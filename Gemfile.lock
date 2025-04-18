@@ -113,7 +113,6 @@ GEM
       rubocop (~> 1.72, >= 1.72.1)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    rubyzip (2.4.1)
     securerandom (0.4.1)
     simplecov (0.22.0)
       docile (~> 1.1)
@@ -155,7 +154,6 @@ DEPENDENCIES
   rubocop
   rubocop-performance
   rubocop-rspec
-  rubyzip
   simplecov
   sinatra
   webmock
