@@ -5,20 +5,12 @@ RSpec.describe GtfsCache do
 
   let(:app) { described_class::App }
 
-  describe "GET /gtfs/:file" do
-    subject(:call) { get "/gtfs/#{file}" }
+  describe "GET /gtfs" do
+    subject(:call) { get "/gtfs" }
 
-    let(:file) { "routes" }
+    context "when data has not been cached" do
+      before { stub_request(:get, "https://www.pvta.com/g_trans/google_transit.zip").to_return(body: "server data") }
 
-    before do
-      zip_file = Zip::OutputStream.write_buffer do |zio|
-        zio.put_next_entry("routes.txt")
-        zio.write "route file content"
-      end.string
-      stub_request(:get, "https://www.pvta.com/g_trans/google_transit.zip").to_return(body: zip_file)
-    end
-
-    context "when file is a valid gtfs file and data has not been cached" do
       it "responds with an ok status" do
         call
         expect(last_response.status).to eq(200)
@@ -26,15 +18,12 @@ RSpec.describe GtfsCache do
 
       it "responds with data from the public gtfs feed" do
         call
-        expect(last_response.body).to eq("route file content")
+        expect(last_response.body).to eq("server data")
       end
     end
 
-    context "when file is a valid gtfs file and data has been cached" do
-      before do
-        allow(GtfsCache::Cache.store).to receive(:fetch).with("gtfs", expires_in: 1.day)
-                                                        .and_return({ "routes" => "cached file content" })
-      end
+    context "when data has been cached" do
+      before { allow(GtfsCache::Cache.store).to receive(:fetch).with("gtfs", any_args).and_return("cache data") }
 
       it "responds with an ok status" do
         call
@@ -43,16 +32,7 @@ RSpec.describe GtfsCache do
 
       it "responds with the cached data" do
         call
-        expect(last_response.body).to eq("cached file content")
-      end
-    end
-
-    context "when file is not a valid gtfs file" do
-      let(:file) { "invalid_file" }
-
-      it "responds with a not found status" do
-        call
-        expect(last_response.status).to eq(404)
+        expect(last_response.body).to eq("cache data")
       end
     end
   end
