@@ -102,6 +102,7 @@ PLATFORMS
 DEPENDENCIES
   irb
   puma
+  rack
   rack-test
   rspec
   rubocop

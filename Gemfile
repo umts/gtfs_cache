@@ -2,6 +2,7 @@ source "https://rubygems.org"
 ruby file: ".ruby-version"
 
 gem "puma", require: false
+gem "rack"
 gem "sinatra", require: "sinatra/base"
 
 group :development do

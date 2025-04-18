@@ -1,5 +1,9 @@
+require_relative "logger"
+
 module GtfsCache
   class App < Sinatra::Base
+    register Logger
+
     get "/up" do
       200
     end
