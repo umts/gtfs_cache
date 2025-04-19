@@ -10,15 +10,15 @@ module GtfsCache
     end
 
     get "/gtfs" do
-      Cache.gtfs
+      Cache.gtfs.presence || [503]
     end
 
     get "/gtfs-rt/alerts" do
-      Cache.gtfs_realtime_alerts
+      Cache.gtfs_realtime_alerts.presence || [503]
     end
 
     get "/gtfs-rt/trip-updates" do
-      Cache.gtfs_realtime_trip_updates
+      Cache.gtfs_realtime_trip_updates || [503]
     end
 
     get "/up" do
