@@ -5,6 +5,10 @@ module GtfsCache
   class App < Sinatra::Base
     register Logger
 
+    before do
+      headers "Access-Control-Allow-Origin" => "*"
+    end
+
     get "/gtfs" do
       Cache.gtfs
     end
