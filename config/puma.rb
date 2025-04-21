@@ -1,4 +1,4 @@
 require_relative "environment"
 
-plugin :gtfs_cache
+plugin :gtfs_cache_refresh
 plugin :tmp_restart

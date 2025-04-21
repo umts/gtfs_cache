@@ -1,4 +1,4 @@
-require_relative "cache"
+require_relative "store"
 require_relative "logger"
 
 module GtfsCache
@@ -10,15 +10,15 @@ module GtfsCache
     end
 
     get "/gtfs" do
-      Cache.gtfs.presence || [503]
+      Store.gtfs.presence || 503
     end
 
     get "/gtfs-rt/alerts" do
-      Cache.gtfs_realtime_alerts.presence || [503]
+      Store.gtfs_realtime_alerts.presence || 503
     end
 
     get "/gtfs-rt/trip-updates" do
-      Cache.gtfs_realtime_trip_updates || [503]
+      Store.gtfs_realtime_trip_updates || 503
     end
 
     get "/up" do
