@@ -19,7 +19,7 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
     end
 
     it "fetches remote data immediately" do
-      thread = Thread.new { plugin.start(nil) }
+      thread = Thread.new { call }
       sleep 0.1 until thread.stop?
       Thread.kill(thread)
 
@@ -29,7 +29,7 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
     end
 
     it "fetches gtfs data every day" do
-      thread = Thread.new { plugin.start(nil) }
+      thread = Thread.new { call }
       4.times do
         sleep 0.1 until thread.stop?
         Timecop.freeze(12.hours.from_now)
@@ -42,7 +42,7 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
     end
 
     it "fetches gtfs realtime data every ten seconds" do
-      thread = Thread.new { plugin.start(nil) }
+      thread = Thread.new { call }
       4.times do
         sleep 0.1 until thread.stop?
         Timecop.freeze(5.seconds.from_now)
@@ -59,7 +59,7 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
       before { allow(GtfsCache::Store).to receive(:refresh_gtfs).and_raise(StandardError) }
 
       it "rescues and carries on" do
-        thread = Thread.new { plugin.start(nil) }
+        thread = Thread.new { call }
         sleep 0.1 until thread.stop?
         Timecop.freeze(1.day.from_now)
         thread.wakeup
