@@ -1,9 +1,11 @@
 plugins:
   - rubocop-performance
+  - rubocop-rake
   - rubocop-rspec
 
 AllCops:
   Exclude:
+    - bin/rake
     - bin/rspec
     - bin/rubocop
     - vendor/**/*

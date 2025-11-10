@@ -6,7 +6,7 @@ module GtfsCache
       def gtfs = store.read("gtfs")
 
       def refresh_gtfs
-        response = Net::HTTP.get_response(URI.parse("https://www.pvta.com/g_trans/google_transit.zip"))
+        response = Net::HTTP.get_response(URI.parse(gtfs_url))
         return unless response.is_a?(Net::HTTPSuccess)
 
         store.write("gtfs", response.body)
@@ -16,7 +16,7 @@ module GtfsCache
 
       def refresh_gtfs_realtime_alerts
         response = Net::HTTP.get_response(
-          URI.parse("https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-alerts/v2"),
+          URI.parse(gtfs_realtime_alerts_url),
           { "Authorization" => CREDENTIALS.swiftly_api_key }
         )
         return unless response.is_a?(Net::HTTPSuccess)
@@ -28,7 +28,7 @@ module GtfsCache
 
       def refresh_gtfs_realtime_trip_updates
         response = Net::HTTP.get_response(
-          URI.parse("https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-trip-updates"),
+          URI.parse(gtfs_realtime_trip_updates_url),
           { "Authorization" => CREDENTIALS.swiftly_api_key }
         )
         return unless response.is_a?(Net::HTTPSuccess)
@@ -52,6 +52,22 @@ module GtfsCache
                      ActiveSupport::Cache::NullStore.new
                    end
       end
+
+      def swiftly_base_url
+        if ENV.fetch("RACK_ENV", "development") == "development"
+          # :nocov:
+          "https://api.goswift.ly/real-time/pioneer-valley-pvta-sandbox"
+          # :nocov:
+        else
+          "https://api.goswift.ly/real-time/pioneer-valley-pvta"
+        end
+      end
+
+      def gtfs_url = "https://www.pvta.com/g_trans/google_transit.zip"
+
+      def gtfs_realtime_alerts_url = File.join(swiftly_base_url, "gtfs-rt-alerts/v2")
+
+      def gtfs_realtime_trip_updates_url = File.join(swiftly_base_url, "gtfs-rt-trip-updates")
     end
   end
 end
