@@ -1,0 +1,26 @@
+service: gtfs_cache
+image: umts/gtfs_cache
+servers:
+  web:
+    - REPLACE_ME
+proxy:
+  ssl: true
+  host: REPLACE_ME
+registry:
+  server: ghcr.io
+  username: REPLACE_ME
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+builder:
+  arch: amd64
+  args:
+    RUBY_VERSION: <%= File.read('.ruby-version').strip %>
+env:
+  secret:
+    - MASTER_KEY
+ssh:
+  user: jenkins
+  key_data: ["<%= ENV.fetch(JENKINS_SSH_KEY, '') %>"]
+volumes:
+  - "gtfs_cache_log:/app/log"
+  - "gtfs_cache_tmp:/app/tmp"
