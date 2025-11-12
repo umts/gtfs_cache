@@ -7,10 +7,7 @@ proxy:
   ssl: true
   host: REPLACE_ME
 registry:
-  server: ghcr.io
-  username: REPLACE_ME
-  password:
-    - KAMAL_REGISTRY_PASSWORD
+  server: localhost:5555
 builder:
   arch: amd64
   args:
