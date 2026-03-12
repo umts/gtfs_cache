@@ -30,3 +30,7 @@ ssh:
 volumes:
   - "gtfs_cache_log:/app/log"
   - "gtfs_cache_tmp:/app/tmp"
+accessories:
+  redis:
+    image: redis:8
+    host: afs-umts-web4.admin.umass.edu
