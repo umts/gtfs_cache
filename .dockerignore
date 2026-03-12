@@ -2,6 +2,7 @@
 
 !/config/
 !/lib/
+!/script/console
 !/script/server
 !/.ruby-version
 !/config.ru

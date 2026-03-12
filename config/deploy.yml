@@ -29,7 +29,6 @@ ssh:
   user: <%= user_for 'afs-umts-web4.admin.umass.edu' %>
 volumes:
   - "gtfs_cache_log:/app/log"
-  - "gtfs_cache_tmp:/app/tmp"
 accessories:
   redis:
     image: redis:8
