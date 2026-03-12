@@ -8,6 +8,10 @@ gem "rack"
 gem "rake"
 gem "sinatra", require: "sinatra/base"
 
+group :production do
+  gem "redis"
+end
+
 group :development do
   gem "irb", require: false
   gem "kamal", require: false
