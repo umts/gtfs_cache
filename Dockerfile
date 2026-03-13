@@ -1,3 +1,8 @@
+# syntax=docker/dockerfile:1
+# check=error=true
+#
+# docker build --tag gtfs_cache --build-arg RUBY_VERSION="$(cat .ruby-version)" .
+
 ARG RUBY_VERSION=OVERRIDE_ME
 
 FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim AS base

@@ -42,7 +42,8 @@ module GtfsCache
         @store ||= case ENV.fetch("RACK_ENV", "development")
                    when "production"
                      # :nocov:
-                     ActiveSupport::Cache::FileStore.new(Pathname(__dir__).join("../../tmp/cache").expand_path)
+                     ActiveSupport::Cache::RedisCacheStore.new(url: "redis://gtfs_cache-redis:6379/0",
+                                                               namespace: "gtfs_cache")
                      # :nocov:
                    when "development"
                      # :nocov:
