@@ -10,7 +10,12 @@ module GtfsCache
     end
 
     get "/gtfs(.zip)?" do
-      Store.gtfs.presence || 503
+      if (gtfs = Store.gtfs.presence)
+        content_type "application/zip"
+        gtfs
+      else
+        503
+      end
     end
 
     get "/gtfs-rt/alerts" do

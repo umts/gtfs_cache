@@ -30,6 +30,11 @@ RSpec.describe GtfsCache do
         call
         expect(last_response.body).to eq("cache data")
       end
+
+      it "resonds with the correct Content-Type" do
+        call
+        expect(last_response.headers).to include("Content-Type" => "application/zip")
+      end
     end
   end
 
