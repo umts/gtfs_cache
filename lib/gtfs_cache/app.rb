@@ -9,7 +9,7 @@ module GtfsCache
       headers "Access-Control-Allow-Origin" => "*"
     end
 
-    get "/gtfs" do
+    get "/gtfs(.zip)?" do
       Store.gtfs.presence || 503
     end
 

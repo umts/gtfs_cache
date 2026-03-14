@@ -33,6 +33,17 @@ RSpec.describe GtfsCache do
     end
   end
 
+  describe "GET /gtfs.zip" do
+    subject(:call) { get "/gtfs.zip" }
+
+    before { allow(GtfsCache::Store).to receive(:gtfs).and_return("cache data") }
+
+    it "responds with an ok status" do
+      call
+      expect(last_response.status).to eq(200)
+    end
+  end
+
   describe "GET /gtfs-rt/alerts" do
     subject(:call) { get "/gtfs-rt/alerts" }
 
