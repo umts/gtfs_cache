@@ -30,6 +30,22 @@ RSpec.describe GtfsCache do
         call
         expect(last_response.body).to eq("cache data")
       end
+
+      it "resonds with the correct Content-Type" do
+        call
+        expect(last_response.headers).to include("Content-Type" => "application/zip")
+      end
+    end
+  end
+
+  describe "GET /gtfs.zip" do
+    subject(:call) { get "/gtfs.zip" }
+
+    before { allow(GtfsCache::Store).to receive(:gtfs).and_return("cache data") }
+
+    it "responds with an ok status" do
+      call
+      expect(last_response.status).to eq(200)
     end
   end
 
