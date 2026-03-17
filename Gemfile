@@ -2,7 +2,6 @@ source "https://rubygems.org"
 ruby file: ".ruby-version"
 
 gem "activesupport", require: "active_support/all"
-gem "openssl" # TODO: Remove once default gem is updated (revert #74).
 gem "puma", require: false
 gem "rack"
 gem "rake"
