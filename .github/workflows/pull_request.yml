@@ -1,0 +1,12 @@
+name: pull_request
+permissions:
+  contents: read
+on:
+  pull_request:
+jobs:
+  integrate-docker:
+    uses: umts/.github/.github/workflwos/integrate-docker.yml@1d454694ab12e03b882fd413667f2b93d02f1853
+    with:
+      build_args: --build-arg RUBY_VERSION="$(cat .ruby-version)"
+  integrate-ruby:
+    uses: umts/.github/.github/workflows/integrate-ruby.yml@1d454694ab12e03b882fd413667f2b93d02f1853
