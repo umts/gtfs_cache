@@ -5,4 +5,5 @@ on:
   pull_request:
 jobs:
   integrate:
+    name: ""
     uses: ./.github/workflows/integrate.yml
