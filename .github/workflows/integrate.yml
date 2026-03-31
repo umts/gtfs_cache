@@ -1,12 +1,12 @@
 on:
   workflow_call:
 jobs:
-  integrate-docker:
-    name: integrate
-    uses: umts/.github/.github/workflows/integrate-docker.yml@696cf2f1a83be5c6bcba18946552d001ee27a34a
-  integrate-rspec:
-    name: integrate
-    uses: umts/.github/.github/workflows/integrate-rspec.yml@696cf2f1a83be5c6bcba18946552d001ee27a34a
-  integrate-rubocop:
-    name: integrate
-    uses: umts/.github/.github/workflows/integrate-rubocop.yml@696cf2f1a83be5c6bcba18946552d001ee27a34a
+  docker:
+    name: app
+    uses: umts/.github/.github/workflows/integrate-docker.yml@main
+  rspec:
+    name: app
+    uses: umts/.github/.github/workflows/integrate-rspec.yml@main
+  rubocop:
+    name: app
+    uses: umts/.github/.github/workflows/integrate-rubocop.yml@main
