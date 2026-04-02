@@ -1,0 +1,12 @@
+on:
+  workflow_call:
+jobs:
+  docker:
+    name: app
+    uses: umts/.github/.github/workflows/docker.yml@main
+  rspec:
+    name: app
+    uses: umts/.github/.github/workflows/rspec.yml@main
+  rubocop:
+    name: app
+    uses: umts/.github/.github/workflows/rubocop.yml@main
