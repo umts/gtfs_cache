@@ -5,32 +5,29 @@ module GtfsCache
   class App < Sinatra::Base
     register Logger
 
+    helpers do
+      def serve_cached(data, content_type)
+        return 503 if data.blank?
+
+        self.content_type content_type
+        data
+      end
+    end
+
     before do
       headers "Access-Control-Allow-Origin" => "*"
     end
 
     get "/gtfs(.zip)?" do
-      data = Store.gtfs.presence
-      next 503 if data.blank?
-
-      content_type "application/zip"
-      data
+      serve_cached Store.gtfs, "application/zip"
     end
 
     get "/gtfs-rt/alerts" do
-      data = Store.gtfs_realtime_alerts.presence
-      next 503 if data.blank?
-
-      content_type "application/protobuf"
-      data
+      serve_cached Store.gtfs_realtime_alerts, "application/protobuf"
     end
 
     get "/gtfs-rt/trip-updates" do
-      data = Store.gtfs_realtime_trip_updates.presence
-      next 503 if data.blank?
-
-      content_type "application/protobuf"
-      data
+      serve_cached Store.gtfs_realtime_trip_updates, "application/protobuf"
     end
 
     get "/up" do
