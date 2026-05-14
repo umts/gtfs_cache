@@ -6,7 +6,7 @@ RSpec.describe GtfsCache::App do
   let(:app) { described_class }
   let(:cache) { instance_double(ActiveSupport::Cache::Store) }
 
-  before { allow(GtfsCache::Store).to receive(:store).and_return(cache) }
+  before { allow(GtfsCache::Store).to receive(:cache).and_return(cache) }
 
   shared_examples "a cache endpoint" do |cache_key: nil, content_type: nil|
     context "when data has not been cached" do

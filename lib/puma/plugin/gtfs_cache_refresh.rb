@@ -24,7 +24,7 @@ module Puma
         return if @last_gtfs_refresh.present? && (current_time - @last_gtfs_refresh) < 1.day
 
         @last_gtfs_refresh = current_time
-        GtfsCache::Store.refresh_gtfs
+        GtfsCache::Store.refresh_gtfs_schedule
       end
 
       def refresh_gtfs_realtime_if_needed

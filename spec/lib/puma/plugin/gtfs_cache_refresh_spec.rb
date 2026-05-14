@@ -11,7 +11,7 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
     around { |example| Timecop.freeze { example.run } }
 
     before do
-      allow(GtfsCache::Store).to receive_messages(refresh_gtfs: nil,
+      allow(GtfsCache::Store).to receive_messages(refresh_gtfs_schedule: nil,
                                                   refresh_gtfs_realtime_alerts: nil,
                                                   refresh_gtfs_realtime_trip_updates: nil)
       allow(plugin).to receive(:in_background).and_yield
@@ -23,9 +23,9 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
       sleep 0.1 until thread.stop?
       Thread.kill(thread)
 
-      expect(GtfsCache::Store).to have_received(:refresh_gtfs).once
+      expect(GtfsCache::Store).to have_received(:refresh_gtfs_schedule).once
       expect(GtfsCache::Store).to have_received(:refresh_gtfs_realtime_alerts).once
-      expect(GtfsCache::Store).to have_received(:refresh_gtfs).once
+      expect(GtfsCache::Store).to have_received(:refresh_gtfs_schedule).once
     end
 
     it "fetches gtfs data every day" do
@@ -38,7 +38,7 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
       sleep 0.1 until thread.stop?
       Thread.kill(thread)
 
-      expect(GtfsCache::Store).to have_received(:refresh_gtfs).thrice
+      expect(GtfsCache::Store).to have_received(:refresh_gtfs_schedule).thrice
     end
 
     it "fetches gtfs realtime data every ten seconds" do
@@ -56,7 +56,7 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
     end
 
     context "when something fails in the main loop" do
-      before { allow(GtfsCache::Store).to receive(:refresh_gtfs).and_raise(StandardError) }
+      before { allow(GtfsCache::Store).to receive(:refresh_gtfs_schedule).and_raise(StandardError) }
 
       it "rescues and carries on" do
         thread = Thread.new { call }
@@ -66,7 +66,7 @@ RSpec.describe Puma::Plugin::GtfsCacheRefresh do
         sleep 0.1 until thread.stop?
         Thread.kill(thread)
 
-        expect(GtfsCache::Store).to have_received(:refresh_gtfs).twice
+        expect(GtfsCache::Store).to have_received(:refresh_gtfs_schedule).twice
       end
     end
   end

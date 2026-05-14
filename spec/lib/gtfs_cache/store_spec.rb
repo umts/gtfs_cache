@@ -1,22 +1,22 @@
 require "gtfs_cache/store"
 
 RSpec.describe GtfsCache::Store do
-  let(:internal_store) { described_class.send(:store) }
+  let(:internal_cache) { described_class.send(:cache) }
 
-  describe ".gtfs" do
-    subject(:call) { described_class.gtfs }
+  describe ".gtfs_schedule" do
+    subject(:call) { described_class.gtfs_schedule }
 
-    before { allow(internal_store).to receive(:read).with("gtfs").and_return("cached data") }
+    before { allow(internal_cache).to receive(:read).with("gtfs").and_return("cached data") }
 
     it "returns the cached value for gtfs" do
       expect(call).to eq("cached data")
     end
   end
 
-  describe ".refresh_gtfs" do
-    subject(:call) { described_class.refresh_gtfs }
+  describe ".refresh_gtfs_schedule" do
+    subject(:call) { described_class.refresh_gtfs_schedule }
 
-    before { allow(internal_store).to receive(:write).with("gtfs", anything).and_return(nil) }
+    before { allow(internal_cache).to receive(:write).with("gtfs", anything).and_return(nil) }
 
     context "when the pvta gtfs endpoint responds successfully" do
       before do
@@ -24,9 +24,9 @@ RSpec.describe GtfsCache::Store do
           .to_return(status: 200, body: "server data")
       end
 
-      it "writes the request body to the store" do
+      it "writes the request body to the cache" do
         call
-        expect(internal_store).to have_received(:write).with("gtfs", "server data")
+        expect(internal_cache).to have_received(:write).with("gtfs", "server data")
       end
     end
 
@@ -36,9 +36,9 @@ RSpec.describe GtfsCache::Store do
           .to_return(status: 500)
       end
 
-      it "does not write anything to the store" do
+      it "does not write anything to the cache" do
         call
-        expect(internal_store).not_to have_received(:write)
+        expect(internal_cache).not_to have_received(:write)
       end
     end
   end
@@ -46,7 +46,7 @@ RSpec.describe GtfsCache::Store do
   describe ".gtfs_realtime_alerts" do
     subject(:call) { described_class.gtfs_realtime_alerts }
 
-    before { allow(internal_store).to receive(:read).with("gtfs_realtime_alerts").and_return("cached data") }
+    before { allow(internal_cache).to receive(:read).with("gtfs_realtime_alerts").and_return("cached data") }
 
     it "returns the cached value for gtfs_realtime_alerts" do
       expect(call).to eq("cached data")
@@ -58,7 +58,7 @@ RSpec.describe GtfsCache::Store do
 
     before do
       allow(CREDENTIALS).to receive(:swiftly_api_key).and_return("test-api-key")
-      allow(internal_store).to receive(:write).with("gtfs_realtime_alerts", anything).and_return(nil)
+      allow(internal_cache).to receive(:write).with("gtfs_realtime_alerts", anything).and_return(nil)
     end
 
     context "when the swiftly realtime alerts endpoint responds successfully" do
@@ -68,9 +68,9 @@ RSpec.describe GtfsCache::Store do
           .to_return(body: "server data")
       end
 
-      it "writes the request body to the store" do
+      it "writes the request body to the cache" do
         call
-        expect(internal_store).to have_received(:write).with("gtfs_realtime_alerts", "server data")
+        expect(internal_cache).to have_received(:write).with("gtfs_realtime_alerts", "server data")
       end
     end
 
@@ -81,9 +81,9 @@ RSpec.describe GtfsCache::Store do
           .to_return(status: 500)
       end
 
-      it "does not write anything to the store" do
+      it "does not write anything to the cache" do
         call
-        expect(internal_store).not_to have_received(:write)
+        expect(internal_cache).not_to have_received(:write)
       end
     end
   end
@@ -91,7 +91,7 @@ RSpec.describe GtfsCache::Store do
   describe ".gtfs_realtime_trip_updates" do
     subject(:call) { described_class.gtfs_realtime_trip_updates }
 
-    before { allow(internal_store).to receive(:read).with("gtfs_realtime_trip_updates").and_return("cached data") }
+    before { allow(internal_cache).to receive(:read).with("gtfs_realtime_trip_updates").and_return("cached data") }
 
     it "returns the cached value for gtfs_realtime_trip_updates" do
       expect(call).to eq("cached data")
@@ -103,7 +103,7 @@ RSpec.describe GtfsCache::Store do
 
     before do
       allow(CREDENTIALS).to receive(:swiftly_api_key).and_return("test-api-key")
-      allow(internal_store).to receive(:write).with("gtfs_realtime_trip_updates", anything).and_return(nil)
+      allow(internal_cache).to receive(:write).with("gtfs_realtime_trip_updates", anything).and_return(nil)
     end
 
     context "when the swiftly realtime trip updates endpoint responds successfully" do
@@ -113,9 +113,9 @@ RSpec.describe GtfsCache::Store do
           .to_return(body: "server data")
       end
 
-      it "writes the request body to the store" do
+      it "writes the request body to the cache" do
         call
-        expect(internal_store).to have_received(:write).with("gtfs_realtime_trip_updates", "server data")
+        expect(internal_cache).to have_received(:write).with("gtfs_realtime_trip_updates", "server data")
       end
     end
 
@@ -126,9 +126,9 @@ RSpec.describe GtfsCache::Store do
           .to_return(status: 500)
       end
 
-      it "does not write anything to the store" do
+      it "does not write anything to the cache" do
         call
-        expect(internal_store).not_to have_received(:write)
+        expect(internal_cache).not_to have_received(:write)
       end
     end
   end

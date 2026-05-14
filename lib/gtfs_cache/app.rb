@@ -19,7 +19,7 @@ module GtfsCache
     end
 
     get "/gtfs(.zip)?" do
-      serve_cached Store.gtfs, "application/zip"
+      serve_cached Store.gtfs_schedule, "application/zip"
     end
 
     get "/gtfs-rt/alerts" do
