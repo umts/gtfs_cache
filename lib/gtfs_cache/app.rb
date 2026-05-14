@@ -10,20 +10,27 @@ module GtfsCache
     end
 
     get "/gtfs(.zip)?" do
-      if (gtfs = Store.gtfs.presence)
-        content_type "application/zip"
-        gtfs
-      else
-        503
-      end
+      data = Store.gtfs.presence
+      next 503 if data.blank?
+
+      content_type "application/zip"
+      data
     end
 
     get "/gtfs-rt/alerts" do
-      Store.gtfs_realtime_alerts.presence || 503
+      data = Store.gtfs_realtime_alerts.presence
+      next 503 if data.blank?
+
+      content_type "application/protobuf"
+      data
     end
 
     get "/gtfs-rt/trip-updates" do
-      Store.gtfs_realtime_trip_updates || 503
+      data = Store.gtfs_realtime_trip_updates.presence
+      next 503 if data.blank?
+
+      content_type "application/protobuf"
+      data
     end
 
     get "/up" do
