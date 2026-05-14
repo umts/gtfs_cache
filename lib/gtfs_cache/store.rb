@@ -1,39 +1,22 @@
-require "net/http"
+require_relative "remote"
 
 module GtfsCache
   module Store
     class << self
       def gtfs = store.read("gtfs")
 
-      def refresh_gtfs
-        response = Net::HTTP.get_response(URI.parse(gtfs_url))
-        return unless response.is_a?(Net::HTTPSuccess)
-
-        store.write("gtfs", response.body)
-      end
-
       def gtfs_realtime_alerts = store.read("gtfs_realtime_alerts")
-
-      def refresh_gtfs_realtime_alerts
-        response = Net::HTTP.get_response(
-          URI.parse(gtfs_realtime_alerts_url),
-          { "Authorization" => CREDENTIALS.swiftly_api_key }
-        )
-        return unless response.is_a?(Net::HTTPSuccess)
-
-        store.write("gtfs_realtime_alerts", response.body)
-      end
 
       def gtfs_realtime_trip_updates = store.read("gtfs_realtime_trip_updates")
 
-      def refresh_gtfs_realtime_trip_updates
-        response = Net::HTTP.get_response(
-          URI.parse(gtfs_realtime_trip_updates_url),
-          { "Authorization" => CREDENTIALS.swiftly_api_key }
-        )
-        return unless response.is_a?(Net::HTTPSuccess)
+      def refresh_gtfs = Remote.gtfs_schedule&.then { |data| store.write("gtfs", data) }
 
-        store.write("gtfs_realtime_trip_updates", response.body)
+      def refresh_gtfs_realtime_alerts
+        Remote.gtfs_realtime_alerts&.then { |data| store.write("gtfs_realtime_alerts", data) }
+      end
+
+      def refresh_gtfs_realtime_trip_updates
+        Remote.gtfs_realtime_trip_updates&.then { |data| store.write("gtfs_realtime_trip_updates", data) }
       end
 
       private
@@ -53,22 +36,6 @@ module GtfsCache
                      ActiveSupport::Cache::NullStore.new
                    end
       end
-
-      def swiftly_base_url
-        if ENV.fetch("RACK_ENV", "development") == "development"
-          # :nocov:
-          "https://api.goswift.ly/real-time/pioneer-valley-pvta-sandbox"
-          # :nocov:
-        else
-          "https://api.goswift.ly/real-time/pioneer-valley-pvta"
-        end
-      end
-
-      def gtfs_url = "https://www.pvta.com/g_trans/google_transit.zip"
-
-      def gtfs_realtime_alerts_url = File.join(swiftly_base_url, "gtfs-rt-alerts/v2")
-
-      def gtfs_realtime_trip_updates_url = File.join(swiftly_base_url, "gtfs-rt-trip-updates")
     end
   end
 end
