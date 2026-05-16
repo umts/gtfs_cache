@@ -9,6 +9,7 @@ gem "sinatra", require: "sinatra/base"
 
 group :production do
   gem "redis"
+  gem "redis-namespace"
 end
 
 group :development do
@@ -27,4 +28,8 @@ group :test do
   gem "simplecov"
   gem "timecop"
   gem "webmock", require: "webmock/rspec"
+end
+
+group :development, :test do
+  gem "mock_redis"
 end
