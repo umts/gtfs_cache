@@ -5,12 +5,9 @@ gem "activesupport", require: "active_support/all"
 gem "puma", require: false
 gem "rack"
 gem "rake"
+gem "redis"
+gem "redis-namespace"
 gem "sinatra", require: "sinatra/base"
-
-group :production do
-  gem "redis"
-  gem "redis-namespace"
-end
 
 group :development do
   gem "irb", require: false

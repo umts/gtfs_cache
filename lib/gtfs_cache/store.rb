@@ -3,67 +3,61 @@ require_relative "remote"
 module GtfsCache
   module Store
     class << self
-      def gtfs_schedule = redis.get("gtfs_schedule:data")
+      def gtfs_schedule = read(:gtfs_schedule)
 
-      def gtfs_realtime_alerts = redis.get("gtfs_realtime_alerts:data")
+      def gtfs_realtime_alerts = read(:gtfs_realtime_alerts)
 
-      def gtfs_realtime_trip_updates = redis.get("gtfs_realtime_trip_updates:data")
+      def gtfs_realtime_trip_updates = read(:gtfs_realtime_trip_updates)
 
-      def keep_warm
-        refresh_gtfs_schedule
-        refresh_gtfs_realtime_alerts
-        refresh_gtfs_realtime_trip_updates
+      def check_for_updates
+        update_gtfs_schedule if stale?(:gtfs_schedule, max_age: 1.day)
+        update_gtfs_realtime_alerts if stale?(:gtfs_realtime_alerts, max_age: 10.seconds)
+        update_gtfs_realtime_trip_updates if stale?(:gtfs_realtime_trip_updates, max_age: 10.seconds)
       end
 
       private
 
       def redis
-        @redis ||= case ENV.fetch("RACK_ENV", "development")
-                   when "production"
-                     # :nocov:
-                     ConnectionPool.new do
-                       Redis::Namespace.new(:gtfs_cache, redis: Redis.new(url: "redis://gtfs_cache-redis:6379/0"))
-                     end
-                     # :nocov:
-                   else
-                     MockRedis.new
-                   end
-      end
-
-      def refresh_gtfs_schedule
-        data = redis.get("gtfs_schedule:data")
-        time = redis.get("gtfs_schedule:time")
-
-        return unless data.nil? || time.nil? || Time.current - Time.at(time) >= 1.day
-
-        Remote.gtfs_schedule&.then do |new_data|
-          redis.set("gtfs_schedule:data", new_data)
-          redis.set("gtfs_schedule:time", Time.current.to_i)
+        @redis ||= ConnectionPool.new do
+          if ENV.fetch("RACK_ENV", "development") == "development"
+            # :nocov:
+            MockRedis.new
+            # :nocov:
+          else
+            Redis::Namespace.new(:gtfs_cache, redis: Redis.new(url: "redis://gtfs_cache-redis:6379/0"))
+          end
         end
       end
 
-      def refresh_gtfs_realtime_alerts
-        data = redis.get("gtfs_realtime_alerts:data")
-        time = redis.get("gtfs_realtime_alerts:time")
+      def read(key) = redis.with { |conn| conn.get("#{key}:data") }
 
-        return unless data.nil? || time.nil? || Time.current - Time.at(time) >= 10.seconds
-
-        Remote.gtfs_realtime_alerts&.then do |new_data|
-          redis.set("gtfs_realtime_alerts:data", new_data)
-          redis.set("gtfs_realtime_alerts:time", Time.current.to_i)
+      def write(key, data)
+        redis.with do |conn|
+          conn.set("#{key}:data", data)
+          conn.set("#{key}:time", Time.current.to_i)
         end
       end
 
-      def refresh_gtfs_realtime_trip_updates
-        data = redis.get("gtfs_realtime_trip_updates:data")
-        time = redis.get("gtfs_realtime_trip_updates:time")
+      def stale?(key, max_age: nil)
+        redis.with do |conn|
+          data = conn.get("#{key}:data")
+          return true if data.blank?
 
-        return unless data.nil? || time.nil? || Time.current - Time.at(time) >= 10.seconds
-
-        Remote.gtfs_realtime_trip_updates&.then do |new_data|
-          redis.set("gtfs_realtime_trip_updates:data", new_data)
-          redis.set("gtfs_realtime_trip_updates:time", Time.current.to_i)
+          time = conn.get("#{key}:time")
+          time.blank? || Time.current - Time.at(time.to_i) > max_age
         end
+      end
+
+      def update_gtfs_schedule
+        Remote.gtfs_schedule&.then { |data| write(:gtfs_schedule, data) }
+      end
+
+      def update_gtfs_realtime_alerts
+        Remote.gtfs_realtime_alerts&.then { |data| write(:gtfs_realtime_alerts, data) }
+      end
+
+      def update_gtfs_realtime_trip_updates
+        Remote.gtfs_realtime_trip_updates&.then { |data| write(:gtfs_realtime_trip_updates, data) }
       end
     end
   end
