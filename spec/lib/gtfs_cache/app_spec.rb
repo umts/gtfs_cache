@@ -1,0 +1,82 @@
+require "gtfs_cache/app"
+
+RSpec.describe GtfsCache::App do
+  include Rack::Test::Methods
+
+  let(:app) { described_class }
+  let(:cache) { instance_double(ActiveSupport::Cache::Store) }
+
+  before { allow(GtfsCache::Store).to receive(:store).and_return(cache) }
+
+  shared_examples "a cache endpoint" do |cache_key: nil, content_type: nil|
+    context "when data has not been cached" do
+      before { allow(cache).to receive(:read).with(cache_key).and_return(nil) }
+
+      it "responds with a service unavailable status" do
+        subject
+        expect(last_response.status).to eq(503)
+      end
+    end
+
+    context "when data has been cached" do
+      before { allow(cache).to receive(:read).with(cache_key).and_return("cached data") }
+
+      it "responds with an ok status" do
+        subject
+        expect(last_response.status).to eq(200)
+      end
+
+      it "responds with a body containing the cached data" do
+        subject
+        expect(last_response.body).to eq("cached data")
+      end
+
+      it "responds with the corresponding content type header" do
+        subject
+        expect(last_response.headers).to include("Content-Type" => content_type)
+      end
+    end
+  end
+
+  describe "GET /gtfs" do
+    subject(:call) { get "/gtfs" }
+
+    it_behaves_like "a cache endpoint", cache_key: "gtfs", content_type: "application/zip"
+  end
+
+  describe "GET /gtfs.zip" do
+    subject(:call) { get "/gtfs.zip" }
+
+    it_behaves_like "a cache endpoint", cache_key: "gtfs", content_type: "application/zip"
+  end
+
+  describe "GET /gtfs-rt/alerts" do
+    subject(:call) { get "/gtfs-rt/alerts" }
+
+    it_behaves_like "a cache endpoint", cache_key: "gtfs_realtime_alerts", content_type: "application/protobuf"
+  end
+
+  describe "GET /gtfs-rt/trip-updates" do
+    subject(:call) { get "/gtfs-rt/trip-updates" }
+
+    it_behaves_like "a cache endpoint", cache_key: "gtfs_realtime_trip_updates", content_type: "application/protobuf"
+  end
+
+  describe "GET /up" do
+    subject(:call) { get "/up" }
+
+    it "responds with an ok status" do
+      call
+      expect(last_response.status).to eq(200)
+    end
+  end
+
+  describe "GET /unrecognized_path" do
+    subject(:call) { get "/unrecognized_path" }
+
+    it "responds with a not found status" do
+      call
+      expect(last_response.status).to eq(404)
+    end
+  end
+end
