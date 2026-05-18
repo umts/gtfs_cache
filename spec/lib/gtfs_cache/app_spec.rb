@@ -1,16 +1,14 @@
 require "gtfs_cache/app"
+require "gtfs_cache/store"
 
 RSpec.describe GtfsCache::App do
   include Rack::Test::Methods
 
   let(:app) { described_class }
-  let(:cache) { instance_double(ActiveSupport::Cache::Store) }
 
-  before { allow(GtfsCache::Store).to receive(:cache).and_return(cache) }
-
-  shared_examples "a cache endpoint" do |cache_key: nil, content_type: nil|
+  shared_examples "a store endpoint" do |store_key: nil, content_type: nil|
     context "when data has not been cached" do
-      before { allow(cache).to receive(:read).with(cache_key).and_return(nil) }
+      before { allow(GtfsCache::Store).to receive(store_key).and_return(nil) }
 
       it "responds with a service unavailable status" do
         subject
@@ -19,7 +17,7 @@ RSpec.describe GtfsCache::App do
     end
 
     context "when data has been cached" do
-      before { allow(cache).to receive(:read).with(cache_key).and_return("cached data") }
+      before { allow(GtfsCache::Store).to receive(store_key).and_return("cached data") }
 
       it "responds with an ok status" do
         subject
@@ -41,25 +39,25 @@ RSpec.describe GtfsCache::App do
   describe "GET /gtfs" do
     subject(:call) { get "/gtfs" }
 
-    it_behaves_like "a cache endpoint", cache_key: "gtfs", content_type: "application/zip"
+    it_behaves_like "a store endpoint", store_key: "gtfs_schedule", content_type: "application/zip"
   end
 
   describe "GET /gtfs.zip" do
     subject(:call) { get "/gtfs.zip" }
 
-    it_behaves_like "a cache endpoint", cache_key: "gtfs", content_type: "application/zip"
+    it_behaves_like "a store endpoint", store_key: "gtfs_schedule", content_type: "application/zip"
   end
 
   describe "GET /gtfs-rt/alerts" do
     subject(:call) { get "/gtfs-rt/alerts" }
 
-    it_behaves_like "a cache endpoint", cache_key: "gtfs_realtime_alerts", content_type: "application/protobuf"
+    it_behaves_like "a store endpoint", store_key: "gtfs_realtime_alerts", content_type: "application/protobuf"
   end
 
   describe "GET /gtfs-rt/trip-updates" do
     subject(:call) { get "/gtfs-rt/trip-updates" }
 
-    it_behaves_like "a cache endpoint", cache_key: "gtfs_realtime_trip_updates", content_type: "application/protobuf"
+    it_behaves_like "a store endpoint", store_key: "gtfs_realtime_trip_updates", content_type: "application/protobuf"
   end
 
   describe "GET /up" do
