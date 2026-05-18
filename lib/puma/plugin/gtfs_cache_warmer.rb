@@ -3,11 +3,11 @@ require "puma/plugin"
 
 module Puma
   class Plugin
-    class GtfsCacheRefresh < Plugin
+    class GtfsCacheWarmer < Plugin
       def start(_)
         in_background do
           loop do
-            GtfsCache::Store.keep_warm
+            GtfsCache::Store.check_for_updates
           rescue StandardError => e
             e
           ensure
@@ -19,4 +19,4 @@ module Puma
   end
 end
 
-Puma::Plugins.register("gtfs_cache_refresh", Puma::Plugin::GtfsCacheRefresh)
+Puma::Plugins.register("gtfs_cache_warmer", Puma::Plugin::GtfsCacheWarmer)

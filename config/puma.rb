@@ -5,5 +5,5 @@ if ENV.fetch("RACK_ENV", nil) == "production"
   preload_app!
 end
 
-plugin :gtfs_cache_refresh
+plugin :gtfs_cache_warmer
 plugin :tmp_restart
