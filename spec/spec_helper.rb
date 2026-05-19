@@ -25,4 +25,10 @@ RSpec.configure do |config|
   config.profile_examples = 10
   config.order = :random
   Kernel.srand config.seed
+
+  redis = MockRedis.new
+  config.before do
+    allow(Redis).to receive(:new).and_return(redis)
+    redis.flushall
+  end
 end
