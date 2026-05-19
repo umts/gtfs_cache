@@ -9,8 +9,6 @@ end
 ENV["RACK_ENV"] = "test"
 require_relative "../config/environment"
 
-redis = MockRedis.new
-
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
@@ -28,6 +26,7 @@ RSpec.configure do |config|
   config.order = :random
   Kernel.srand config.seed
 
+  redis = MockRedis.new
   config.before do
     allow(Redis).to receive(:new).and_return(redis)
     redis.flushall
