@@ -18,7 +18,7 @@ module GtfsCache
       private
 
       def redis
-        @redis ||= ConnectionPool.new do
+        @redis ||= ConnectionPool.new(size: 5) do
           if ENV.fetch("RACK_ENV", "development") == "development"
             # :nocov:
             MockRedis.new

@@ -2,6 +2,7 @@ require_relative "environment"
 
 if ENV.fetch("RACK_ENV", nil) == "production"
   workers 2
+  threads 2, 5
   preload_app!
 end
 
