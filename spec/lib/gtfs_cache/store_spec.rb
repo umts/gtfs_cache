@@ -24,7 +24,7 @@ RSpec.describe GtfsCache::Store do
       before { described_class.check_for_updates }
 
       it "returns freshly fetched data" do
-        expect(subject).to eq("data 1")
+        expect(subject).to have_attributes(data: "data 1", expires: ttl.from_now)
       end
     end
 
@@ -36,7 +36,7 @@ RSpec.describe GtfsCache::Store do
       end
 
       it "returns the still fresh data" do
-        expect(subject).to eq("data 1")
+        expect(subject).to have_attributes(data: "data 1", expires: Time.current)
       end
     end
 
@@ -50,7 +50,7 @@ RSpec.describe GtfsCache::Store do
       end
 
       it "returns freshly fetched data" do
-        expect(subject).to eq("data 2")
+        expect(subject).to have_attributes(data: "data 2", expires: ttl.from_now)
       end
     end
 
@@ -66,7 +66,7 @@ RSpec.describe GtfsCache::Store do
       end
 
       it "returns stale data" do
-        expect(subject).to eq("data 2")
+        expect(subject).to have_attributes(data: "data 2", expires: 1.second.ago)
       end
     end
   end

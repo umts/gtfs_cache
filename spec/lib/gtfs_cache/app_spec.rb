@@ -1,4 +1,5 @@
 require "gtfs_cache/app"
+require "gtfs_cache/entry"
 require "gtfs_cache/store"
 
 RSpec.describe GtfsCache::App do
@@ -17,7 +18,9 @@ RSpec.describe GtfsCache::App do
     end
 
     context "when data has been cached" do
-      before { allow(GtfsCache::Store).to receive(store_key).and_return("cached data") }
+      before do
+        allow(GtfsCache::Store).to receive(store_key).and_return(GtfsCache::Entry.new(data: "cached data"))
+      end
 
       it "responds with an ok status" do
         subject

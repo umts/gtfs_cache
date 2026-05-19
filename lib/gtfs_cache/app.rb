@@ -6,11 +6,11 @@ module GtfsCache
     register Logger
 
     helpers do
-      def serve_cached(data, content_type)
-        return 503 if data.blank?
+      def serve_entry(entry, content_type)
+        return 503 if entry.blank?
 
         self.content_type content_type
-        data
+        entry.data
       end
     end
 
@@ -19,15 +19,15 @@ module GtfsCache
     end
 
     get "/gtfs(.zip)?" do
-      serve_cached Store.gtfs_schedule, "application/zip"
+      serve_entry Store.gtfs_schedule, "application/zip"
     end
 
     get "/gtfs-rt/alerts" do
-      serve_cached Store.gtfs_realtime_alerts, "application/protobuf"
+      serve_entry Store.gtfs_realtime_alerts, "application/protobuf"
     end
 
     get "/gtfs-rt/trip-updates" do
-      serve_cached Store.gtfs_realtime_trip_updates, "application/protobuf"
+      serve_entry Store.gtfs_realtime_trip_updates, "application/protobuf"
     end
 
     get "/up" do

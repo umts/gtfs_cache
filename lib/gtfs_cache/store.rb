@@ -1,3 +1,4 @@
+require_relative "entry"
 require_relative "remote"
 
 module GtfsCache
@@ -10,9 +11,9 @@ module GtfsCache
       def gtfs_realtime_trip_updates = read(:gtfs_realtime_trip_updates)
 
       def check_for_updates
-        update_gtfs_schedule if stale?(:gtfs_schedule)
-        update_gtfs_realtime_alerts if stale?(:gtfs_realtime_alerts)
-        update_gtfs_realtime_trip_updates if stale?(:gtfs_realtime_trip_updates)
+        update_gtfs_schedule unless read(:gtfs_schedule)&.fresh?
+        update_gtfs_realtime_alerts unless read(:gtfs_realtime_alerts)&.fresh?
+        update_gtfs_realtime_trip_updates unless read(:gtfs_realtime_trip_updates)&.fresh?
       end
 
       private
@@ -29,40 +30,39 @@ module GtfsCache
         end
       end
 
-      def read(key) = redis.with { |conn| conn.get("#{key}:data") }
-
-      def write(key, data, expires_in: 0)
+      def read(key)
         redis.with do |conn|
-          conn.set("#{key}:data", data)
-          conn.set("#{key}:time", (Time.current + expires_in).to_i)
+          conn.get("#{key}:data")&.then do |data|
+            expires = conn.get("#{key}:expires")
+            Entry.new(data:, expires: expires && Time.at(expires.to_i))
+          end
         end
       end
 
-      def stale?(key)
+      def write(key, data, expires: nil)
         redis.with do |conn|
-          data = conn.get("#{key}:data")
-          return true if data.blank?
-
-          time = conn.get("#{key}:time")
-          time.blank? || Time.zone.at(time.to_i) < Time.current
+          conn.multi do |transaction|
+            transaction.set("#{key}:data", data)
+            transaction.set("#{key}:expires", expires&.to_i)
+          end
         end
       end
 
       def update_gtfs_schedule
         Remote.gtfs_schedule&.then do |data|
-          write(:gtfs_schedule, data, expires_in: 1.day)
+          write(:gtfs_schedule, data, expires: 1.day.from_now)
         end
       end
 
       def update_gtfs_realtime_alerts
         Remote.gtfs_realtime_alerts&.then do |data|
-          write(:gtfs_realtime_alerts, data, expires_in: 10.seconds)
+          write(:gtfs_realtime_alerts, data, expires: 10.seconds.from_now)
         end
       end
 
       def update_gtfs_realtime_trip_updates
         Remote.gtfs_realtime_trip_updates&.then do |data|
-          write(:gtfs_realtime_trip_updates, data, expires_in: 10.seconds)
+          write(:gtfs_realtime_trip_updates, data, expires: 10.seconds.from_now)
         end
       end
     end
