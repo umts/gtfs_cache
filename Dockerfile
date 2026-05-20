@@ -57,4 +57,4 @@ RUN groupadd --system --gid 1000 gtfs-cache && \
 USER 1000:1000
 
 EXPOSE 80
-CMD ["bin/server", "--port=80"]
+CMD ["bin/puma", "config.ru", "--port=80"]

@@ -25,7 +25,7 @@ The application is built on the Sinatra framework. It is recommended you use rbe
 * Run `bin/rspec` to run the tests.
 * Run `bin/rubocop` to run the linter.
 * Run `bin/console` for an interactive prompt that will allow you to experiment.
-* Run `bin/server` to run the development server.
+* Run `bin/dev` to run the development server.
 * Run `bin/setup` to install dependencies.
 
 ## Contributing
