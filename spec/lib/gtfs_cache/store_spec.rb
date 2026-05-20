@@ -82,6 +82,15 @@ RSpec.describe GtfsCache::Store do
     end
   end
 
+  describe ".gtfs_schedule_routes" do
+    subject(:call) { described_class.gtfs_schedule_routes }
+
+    it_behaves_like "a cached remote value", remote_source: :gtfs_schedule, ttl: 1.day do
+      let(:remote_responses) { [file_fixture("schedule1.zip").read, file_fixture("schedule2.zip").read] }
+      let(:stored_datas) { [file_fixture("schedule1/routes.txt").read, file_fixture("schedule2/routes.txt").read] }
+    end
+  end
+
   describe ".gtfs_realtime_alerts" do
     subject(:call) { described_class.gtfs_realtime_alerts }
 
