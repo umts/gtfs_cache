@@ -1,6 +1,4 @@
 require "gtfs_cache/app"
-require "gtfs_cache/entry"
-require "gtfs_cache/store"
 
 RSpec.describe GtfsCache::App do
   include Rack::Test::Methods
@@ -9,8 +7,6 @@ RSpec.describe GtfsCache::App do
 
   shared_examples "a store endpoint" do |store_key: nil, content_type: nil|
     context "when data has not been cached" do
-      before { allow(GtfsCache::Store).to receive(store_key).and_return(nil) }
-
       it "responds with a service unavailable status" do
         subject
         expect(last_response.status).to eq(503)
@@ -18,11 +14,7 @@ RSpec.describe GtfsCache::App do
     end
 
     context "when data has been cached" do
-      before do
-        allow(GtfsCache::Store).to receive(store_key).and_return(
-          GtfsCache::Entry.new(data: "cached data", expires: nil)
-        )
-      end
+      before { redis.set("#{store_key}:data", "cached data") }
 
       it "responds with an ok status" do
         subject
