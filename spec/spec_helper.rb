@@ -8,6 +8,7 @@ end
 
 ENV["RACK_ENV"] = "test"
 require_relative "../config/environment"
+require_relative "support/redis_helper"
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -25,10 +26,5 @@ RSpec.configure do |config|
   config.profile_examples = 10
   config.order = :random
   Kernel.srand config.seed
-
-  redis = MockRedis.new
-  config.before do
-    allow(Redis).to receive(:new).and_return(redis)
-    redis.flushall
-  end
+  config.include RedisHelper
 end
