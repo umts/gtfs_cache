@@ -2,8 +2,8 @@
 
 !/config/
 !/lib/
-!/script/console
-!/script/server
+!/bin/console
+!/bin/puma
 !/.ruby-version
 !/config.ru
 !/Gemfile

@@ -18,15 +18,15 @@ The application is built on the Sinatra framework. It is recommended you use rbe
 ### Setup
 
 1) Install ruby. (`rbenv install`)
-2) Run the setup script. (`script/setup`)
+2) Run the setup script. (`bin/setup`)
 
 ### Scripts
 
 * Run `bin/rspec` to run the tests.
 * Run `bin/rubocop` to run the linter.
-* Run `script/console` for an interactive prompt that will allow you to experiment.
-* Run `script/server` to run the development server.
-* Run `script/setup` to install dependencies.
+* Run `bin/console` for an interactive prompt that will allow you to experiment.
+* Run `bin/dev` to run the development server.
+* Run `bin/setup` to install dependencies.
 
 ## Contributing
 
