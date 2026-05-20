@@ -20,13 +20,14 @@ module GtfsCache
 
       def redis
         @redis ||= ConnectionPool.new(size: 5) do
-          if ENV.fetch("RACK_ENV", "development") == "development"
-            # :nocov:
-            MockRedis.new
-            # :nocov:
-          else
-            Redis::Namespace.new(:gtfs_cache, redis: Redis.new(url: "redis://gtfs_cache-redis:6379/0"))
-          end
+          redis = if ENV.fetch("RACK_ENV", "development") == "development"
+                    # :nocov:
+                    MockRedis.new
+                    # :nocov:
+                  else
+                    Redis.new(url: "redis://gtfs_cache-redis:6379/0")
+                  end
+          Redis::Namespace.new(:gtfs_cache, redis:)
         end
       end
 
