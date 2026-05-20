@@ -39,11 +39,11 @@ module GtfsCache
         end
       end
 
-      def write(key, data, expires: nil)
+      def write(key, data, expires: Time.current)
         redis.with do |conn|
           conn.multi do |transaction|
             transaction.set("#{key}:data", data)
-            transaction.set("#{key}:expires", expires&.to_i)
+            transaction.set("#{key}:expires", expires.to_i)
           end
         end
       end
