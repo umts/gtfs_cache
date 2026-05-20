@@ -19,7 +19,9 @@ RSpec.describe GtfsCache::App do
 
     context "when data has been cached" do
       before do
-        allow(GtfsCache::Store).to receive(store_key).and_return(GtfsCache::Entry.new(data: "cached data"))
+        allow(GtfsCache::Store).to receive(store_key).and_return(
+          GtfsCache::Entry.new(data: "cached data", expires: nil)
+        )
       end
 
       it "responds with an ok status" do
