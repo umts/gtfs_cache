@@ -1,74 +1,71 @@
-require "net/http"
+require_relative "entry"
+require_relative "remote"
 
 module GtfsCache
   module Store
     class << self
-      def gtfs = store.read("gtfs")
+      def gtfs_schedule = read(:gtfs_schedule)
 
-      def refresh_gtfs
-        response = Net::HTTP.get_response(URI.parse(gtfs_url))
-        return unless response.is_a?(Net::HTTPSuccess)
+      def gtfs_realtime_alerts = read(:gtfs_realtime_alerts)
 
-        store.write("gtfs", response.body)
-      end
+      def gtfs_realtime_trip_updates = read(:gtfs_realtime_trip_updates)
 
-      def gtfs_realtime_alerts = store.read("gtfs_realtime_alerts")
-
-      def refresh_gtfs_realtime_alerts
-        response = Net::HTTP.get_response(
-          URI.parse(gtfs_realtime_alerts_url),
-          { "Authorization" => CREDENTIALS.swiftly_api_key }
-        )
-        return unless response.is_a?(Net::HTTPSuccess)
-
-        store.write("gtfs_realtime_alerts", response.body)
-      end
-
-      def gtfs_realtime_trip_updates = store.read("gtfs_realtime_trip_updates")
-
-      def refresh_gtfs_realtime_trip_updates
-        response = Net::HTTP.get_response(
-          URI.parse(gtfs_realtime_trip_updates_url),
-          { "Authorization" => CREDENTIALS.swiftly_api_key }
-        )
-        return unless response.is_a?(Net::HTTPSuccess)
-
-        store.write("gtfs_realtime_trip_updates", response.body)
+      def check_for_updates
+        update_gtfs_schedule unless read(:gtfs_schedule)&.fresh?
+        update_gtfs_realtime_alerts unless read(:gtfs_realtime_alerts)&.fresh?
+        update_gtfs_realtime_trip_updates unless read(:gtfs_realtime_trip_updates)&.fresh?
       end
 
       private
 
-      def store
-        @store ||= case ENV.fetch("RACK_ENV", "development")
-                   when "production"
-                     # :nocov:
-                     ActiveSupport::Cache::RedisCacheStore.new(url: "redis://gtfs_cache-redis:6379/0",
-                                                               namespace: "gtfs_cache")
-                     # :nocov:
-                   when "development"
-                     # :nocov:
-                     ActiveSupport::Cache::MemoryStore.new
-                     # :nocov:
-                   else
-                     ActiveSupport::Cache::NullStore.new
-                   end
-      end
-
-      def swiftly_base_url
-        if ENV.fetch("RACK_ENV", "development") == "development"
-          # :nocov:
-          "https://api.goswift.ly/real-time/pioneer-valley-pvta-sandbox"
-          # :nocov:
-        else
-          "https://api.goswift.ly/real-time/pioneer-valley-pvta"
+      def redis
+        @redis ||= ConnectionPool.new(size: 5) do
+          redis = if ENV.fetch("RACK_ENV", "development") == "development"
+                    # :nocov:
+                    MockRedis.new
+                    # :nocov:
+                  else
+                    Redis.new(url: "redis://gtfs_cache-redis:6379/0")
+                  end
+          Redis::Namespace.new(:gtfs_cache, redis:)
         end
       end
 
-      def gtfs_url = "https://www.pvta.com/g_trans/google_transit.zip"
+      def read(key)
+        redis.with do |conn|
+          conn.get("#{key}:data")&.then do |data|
+            expires = conn.get("#{key}:expires")
+            Entry.new(data:, expires: expires && Time.at(expires.to_i))
+          end
+        end
+      end
 
-      def gtfs_realtime_alerts_url = File.join(swiftly_base_url, "gtfs-rt-alerts/v2")
+      def write(key, data, expires: Time.current)
+        redis.with do |conn|
+          conn.multi do |transaction|
+            transaction.set("#{key}:data", data)
+            transaction.set("#{key}:expires", expires.to_i)
+          end
+        end
+      end
 
-      def gtfs_realtime_trip_updates_url = File.join(swiftly_base_url, "gtfs-rt-trip-updates")
+      def update_gtfs_schedule
+        Remote.gtfs_schedule&.then do |data|
+          write(:gtfs_schedule, data, expires: 1.day.from_now)
+        end
+      end
+
+      def update_gtfs_realtime_alerts
+        Remote.gtfs_realtime_alerts&.then do |data|
+          write(:gtfs_realtime_alerts, data, expires: 10.seconds.from_now)
+        end
+      end
+
+      def update_gtfs_realtime_trip_updates
+        Remote.gtfs_realtime_trip_updates&.then do |data|
+          write(:gtfs_realtime_trip_updates, data, expires: 10.seconds.from_now)
+        end
+      end
     end
   end
 end

@@ -8,6 +8,7 @@ end
 
 ENV["RACK_ENV"] = "test"
 require_relative "../config/environment"
+require_relative "support/redis_helper"
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -25,4 +26,5 @@ RSpec.configure do |config|
   config.profile_examples = 10
   config.order = :random
   Kernel.srand config.seed
+  config.include RedisHelper
 end

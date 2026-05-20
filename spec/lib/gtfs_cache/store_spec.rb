@@ -1,135 +1,91 @@
+require "active_support/testing/time_helpers"
+require "gtfs_cache/remote"
 require "gtfs_cache/store"
 
 RSpec.describe GtfsCache::Store do
-  let(:internal_store) { described_class.send(:store) }
+  include ActiveSupport::Testing::TimeHelpers
 
-  describe ".gtfs" do
-    subject(:call) { described_class.gtfs }
+  shared_examples "a cached remote value" do |remote_key: nil, ttl: nil|
+    before do
+      freeze_time
+      allow(GtfsCache::Remote).to receive_messages(gtfs_schedule: nil,
+                                                   gtfs_realtime_alerts: nil,
+                                                   gtfs_realtime_trip_updates: nil)
+      allow(GtfsCache::Remote).to receive(remote_key).and_return("data 1", "data 2", nil)
+    end
 
-    before { allow(internal_store).to receive(:read).with("gtfs").and_return("cached data") }
+    context "when called initially" do
+      it "returns nil" do
+        expect(subject).to be_nil
+      end
+    end
 
-    it "returns the cached value for gtfs" do
-      expect(call).to eq("cached data")
+    context "when called after an update check with no existing data" do
+      before { described_class.check_for_updates }
+
+      it "returns freshly fetched data" do
+        expect(subject).to have_attributes(data: "data 1", expires: ttl.from_now)
+      end
+    end
+
+    context "when called after an update check with fresh data" do
+      before do
+        described_class.check_for_updates
+        travel ttl
+        described_class.check_for_updates
+      end
+
+      it "returns the still fresh data" do
+        expect(subject).to have_attributes(data: "data 1", expires: Time.current)
+      end
+    end
+
+    context "when called after an update check with stale data" do
+      before do
+        described_class.check_for_updates
+        travel ttl
+        described_class.check_for_updates
+        travel 1.second
+        described_class.check_for_updates
+      end
+
+      it "returns freshly fetched data" do
+        expect(subject).to have_attributes(data: "data 2", expires: ttl.from_now)
+      end
+    end
+
+    context "when called after an update check with stale data that failed" do
+      before do
+        described_class.check_for_updates
+        travel ttl
+        described_class.check_for_updates
+        travel 1.second
+        described_class.check_for_updates
+        travel ttl + 1.second
+        described_class.check_for_updates
+      end
+
+      it "returns stale data" do
+        expect(subject).to have_attributes(data: "data 2", expires: 1.second.ago)
+      end
     end
   end
 
-  describe ".refresh_gtfs" do
-    subject(:call) { described_class.refresh_gtfs }
+  describe ".gtfs_schedule" do
+    subject(:call) { described_class.gtfs_schedule }
 
-    before { allow(internal_store).to receive(:write).with("gtfs", anything).and_return(nil) }
-
-    context "when the pvta gtfs endpoint responds successfully" do
-      before do
-        stub_request(:get, "https://www.pvta.com/g_trans/google_transit.zip")
-          .to_return(status: 200, body: "server data")
-      end
-
-      it "writes the request body to the store" do
-        call
-        expect(internal_store).to have_received(:write).with("gtfs", "server data")
-      end
-    end
-
-    context "when the pvta gtfs endpoint responds with an error" do
-      before do
-        stub_request(:get, "https://www.pvta.com/g_trans/google_transit.zip")
-          .to_return(status: 500)
-      end
-
-      it "does not write anything to the store" do
-        call
-        expect(internal_store).not_to have_received(:write)
-      end
-    end
+    it_behaves_like "a cached remote value", remote_key: :gtfs_schedule, ttl: 1.day
   end
 
   describe ".gtfs_realtime_alerts" do
     subject(:call) { described_class.gtfs_realtime_alerts }
 
-    before { allow(internal_store).to receive(:read).with("gtfs_realtime_alerts").and_return("cached data") }
-
-    it "returns the cached value for gtfs_realtime_alerts" do
-      expect(call).to eq("cached data")
-    end
-  end
-
-  describe ".refresh_gtfs_realtime_alerts" do
-    subject(:call) { described_class.refresh_gtfs_realtime_alerts }
-
-    before do
-      allow(CREDENTIALS).to receive(:swiftly_api_key).and_return("test-api-key")
-      allow(internal_store).to receive(:write).with("gtfs_realtime_alerts", anything).and_return(nil)
-    end
-
-    context "when the swiftly realtime alerts endpoint responds successfully" do
-      before do
-        stub_request(:get, "https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-alerts/v2")
-          .with(headers: { "Authorization" => "test-api-key" })
-          .to_return(body: "server data")
-      end
-
-      it "writes the request body to the store" do
-        call
-        expect(internal_store).to have_received(:write).with("gtfs_realtime_alerts", "server data")
-      end
-    end
-
-    context "when the swiftly realtime alerts endpoint responds with an error" do
-      before do
-        stub_request(:get, "https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-alerts/v2")
-          .with(headers: { "Authorization" => "test-api-key" })
-          .to_return(status: 500)
-      end
-
-      it "does not write anything to the store" do
-        call
-        expect(internal_store).not_to have_received(:write)
-      end
-    end
+    it_behaves_like "a cached remote value", remote_key: :gtfs_realtime_alerts, ttl: 10.seconds
   end
 
   describe ".gtfs_realtime_trip_updates" do
     subject(:call) { described_class.gtfs_realtime_trip_updates }
 
-    before { allow(internal_store).to receive(:read).with("gtfs_realtime_trip_updates").and_return("cached data") }
-
-    it "returns the cached value for gtfs_realtime_trip_updates" do
-      expect(call).to eq("cached data")
-    end
-  end
-
-  describe ".refresh_gtfs_realtime_trip_updates" do
-    subject(:call) { described_class.refresh_gtfs_realtime_trip_updates }
-
-    before do
-      allow(CREDENTIALS).to receive(:swiftly_api_key).and_return("test-api-key")
-      allow(internal_store).to receive(:write).with("gtfs_realtime_trip_updates", anything).and_return(nil)
-    end
-
-    context "when the swiftly realtime trip updates endpoint responds successfully" do
-      before do
-        stub_request(:get, "https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-trip-updates")
-          .with(headers: { "Authorization" => "test-api-key" })
-          .to_return(body: "server data")
-      end
-
-      it "writes the request body to the store" do
-        call
-        expect(internal_store).to have_received(:write).with("gtfs_realtime_trip_updates", "server data")
-      end
-    end
-
-    context "when the swiftly realtime trip updates endpoint responds with an error" do
-      before do
-        stub_request(:get, "https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-trip-updates")
-          .with(headers: { "Authorization" => "test-api-key" })
-          .to_return(status: 500)
-      end
-
-      it "does not write anything to the store" do
-        call
-        expect(internal_store).not_to have_received(:write)
-      end
-    end
+    it_behaves_like "a cached remote value", remote_key: :gtfs_realtime_trip_updates, ttl: 10.seconds
   end
 end

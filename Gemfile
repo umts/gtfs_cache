@@ -5,11 +5,9 @@ gem "activesupport", require: "active_support/all"
 gem "puma", require: false
 gem "rack"
 gem "rake"
+gem "redis"
+gem "redis-namespace"
 gem "sinatra", require: "sinatra/base"
-
-group :production do
-  gem "redis"
-end
 
 group :development do
   gem "irb", require: false
@@ -25,6 +23,9 @@ group :test do
   gem "rack-test"
   gem "rspec"
   gem "simplecov"
-  gem "timecop"
   gem "webmock", require: "webmock/rspec"
+end
+
+group :development, :test do
+  gem "mock_redis"
 end
