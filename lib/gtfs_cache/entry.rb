@@ -1,5 +1,5 @@
 module GtfsCache
-  Entry = Data.define(:data, :expires) do
-    def fresh? = expires.blank? || expires >= Time.current
+  Entry = Data.define(:data, :etag, :time, :expires) do
+    def fresh? = [data, etag, time, expires].all?(&:present?) && expires >= Time.current
   end
 end
