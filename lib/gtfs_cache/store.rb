@@ -1,5 +1,6 @@
 require_relative "entry"
 require_relative "remote"
+require "zip"
 
 module GtfsCache
   module Store
