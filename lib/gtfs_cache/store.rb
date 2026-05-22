@@ -61,9 +61,9 @@ module GtfsCache
 
       def update_gtfs_schedule_routes
         Remote.gtfs_schedule&.then do |data|
-          Zip::File.open(data) do |zip_file|
-            routes = zip_file.find_entry("/routes.txt")
-            write(:gtfs_schedule_routes, routes, expires: 1.day.from_now)
+          Zip::File.open_buffer(data) do |zip_file|
+            routes_data = zip_file.find_entry("routes.txt").get_input_stream.read
+            write(:gtfs_schedule_routes, routes_data, expires: 1.day.from_now)
           end
         end
       end
