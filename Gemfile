@@ -1,6 +1,8 @@
 source "https://rubygems.org"
 ruby file: ".ruby-version"
 
+gem "rubyzip"
+
 gem "activesupport", require: "active_support/all"
 gem "puma", require: false
 gem "rack"
