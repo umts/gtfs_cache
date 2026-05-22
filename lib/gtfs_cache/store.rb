@@ -6,6 +6,8 @@ module GtfsCache
     class << self
       def gtfs_schedule = read(:gtfs_schedule)
 
+      def gtfs_schedule_routes = read(:gtfs_schedule_routes)
+
       def gtfs_realtime_alerts = read(:gtfs_realtime_alerts)
 
       def gtfs_realtime_trip_updates = read(:gtfs_realtime_trip_updates)
@@ -51,7 +53,11 @@ module GtfsCache
 
       def update_gtfs_schedule
         Remote.gtfs_schedule&.then do |data|
-          write(:gtfs_schedule, data, expires: 1.day.from_now)
+          expires = 1.day.from_now
+          write(:gtfs_schedule, data, expires:)
+          Zip::File.open_buffer(data) do |zip_file|
+            write(:gtfs_schedule_routes, zip_file.find_entry("routes.txt").get_input_stream.read, expires:)
+          end
         end
       end
 

@@ -22,6 +22,10 @@ module GtfsCache
       serve_entry Store.gtfs_schedule, "application/zip"
     end
 
+    get "/gtfs/routes(.txt)?" do
+      serve_entry Store.gtfs_schedule_routes, "text/csv"
+    end
+
     get "/gtfs-rt/alerts" do
       serve_entry Store.gtfs_realtime_alerts, "application/protobuf"
     end

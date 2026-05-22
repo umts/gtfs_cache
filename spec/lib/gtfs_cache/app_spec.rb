@@ -28,7 +28,7 @@ RSpec.describe GtfsCache::App do
 
       it "responds with the corresponding content type header" do
         subject
-        expect(last_response.headers).to include("Content-Type" => content_type)
+        expect(last_response.headers).to include("Content-Type" => matching(content_type))
       end
     end
   end
@@ -43,6 +43,18 @@ RSpec.describe GtfsCache::App do
     subject(:call) { get "/gtfs.zip" }
 
     it_behaves_like "a store endpoint", store_key: "gtfs_schedule", content_type: "application/zip"
+  end
+
+  describe "GET /gtfs/routes" do
+    subject(:call) { get "/gtfs/routes" }
+
+    it_behaves_like "a store endpoint", store_key: "gtfs_schedule_routes", content_type: "text/csv"
+  end
+
+  describe "GET /gtfs/routes.txt" do
+    subject(:call) { get "/gtfs/routes.txt" }
+
+    it_behaves_like "a store endpoint", store_key: "gtfs_schedule_routes", content_type: "text/csv"
   end
 
   describe "GET /gtfs-rt/alerts" do

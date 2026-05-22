@@ -7,6 +7,7 @@ gem "rack"
 gem "rake"
 gem "redis"
 gem "redis-namespace"
+gem "rubyzip", require: "zip"
 gem "sinatra", require: "sinatra/base"
 
 group :development do
