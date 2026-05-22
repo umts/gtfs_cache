@@ -1,6 +1,5 @@
 require_relative "entry"
 require_relative "remote"
-require "zip"
 
 module GtfsCache
   module Store
@@ -54,10 +53,10 @@ module GtfsCache
 
       def update_gtfs_schedule
         Remote.gtfs_schedule&.then do |data|
-          write(:gtfs_schedule, data, expires: 1.day.from_now)
+          expires = 1.day.from_now
+          write(:gtfs_schedule, data, expires:)
           Zip::File.open_buffer(data) do |zip_file|
-            routes_data = zip_file.find_entry("routes.txt").get_input_stream.read
-            write(:gtfs_schedule_routes, routes_data, expires: 1.day.from_now)
+            write(:gtfs_schedule_routes, zip_file.find_entry("routes.txt").get_input_stream.read, expires:)
           end
         end
       end

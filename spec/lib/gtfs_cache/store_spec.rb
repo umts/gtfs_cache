@@ -87,7 +87,9 @@ RSpec.describe GtfsCache::Store do
 
     it_behaves_like "a cached remote value", remote_source: :gtfs_schedule, ttl: 1.day do
       let(:remote_responses) { [file_fixture("schedule1.zip").read, file_fixture("schedule2.zip").read] }
-      let(:stored_datas) { [file_fixture("schedule1/routes.txt").read, file_fixture("schedule2/routes.txt").read] }
+      let(:stored_datas) do
+        [file_fixture("schedule1/routes.txt").read, file_fixture("schedule2/routes.txt").read]
+      end
     end
   end
 
