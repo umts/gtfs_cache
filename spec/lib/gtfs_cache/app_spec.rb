@@ -28,7 +28,8 @@ RSpec.describe GtfsCache::App do
 
       it "responds with the corresponding content type header" do
         subject
-        expect(last_response.headers).to include("Content-Type" => content_type)
+        expect(last_response.headers.transform_keys(&:downcase).transform_values { |v| v.split(";").first })
+          .to include("Content-Type" => content_type)
       end
     end
   end
