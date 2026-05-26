@@ -13,7 +13,7 @@ RSpec.describe GtfsCache::App do
       end
     end
 
-    context "when data has been cached" do
+    context "when data has been cached without cache control info" do
       before { redis.set("#{store_key}:data", "cached data") }
 
       it "responds with an ok status" do
@@ -29,6 +29,15 @@ RSpec.describe GtfsCache::App do
       it "responds with the corresponding content type header" do
         subject
         expect(last_response.headers).to include("Content-Type" => matching(content_type))
+      end
+
+      it "responds with headers that strictly disallow client side caching" do
+        subject
+        expect(last_response.headers).to include(
+          "Cache-Control" => matching("no-store").and(matching("no-cache")).and(matching("must-revalidate")),
+          "Pragma" => "no-cache",
+          "Expires" => "0"
+        )
       end
     end
   end

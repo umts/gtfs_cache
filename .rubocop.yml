@@ -12,6 +12,13 @@ AllCops:
     - vendor/**/*
   NewCops: enable
 
+RSpec/ExampleLength:
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+
 Style/Documentation:
   Enabled: false
 

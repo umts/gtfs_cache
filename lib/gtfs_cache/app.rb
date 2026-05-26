@@ -9,6 +9,10 @@ module GtfsCache
       def serve_entry(entry, content_type)
         return 503 if entry.blank?
 
+        unless entry.fresh?
+          headers "Cache-Control" => "no-store, no-cache, must-revalidate", "Pragma" => "no-cache", "Expires" => "0"
+        end
+
         self.content_type content_type
         entry.data
       end
