@@ -5,107 +5,133 @@ require "gtfs_cache/store"
 RSpec.describe GtfsCache::Store do
   include ActiveSupport::Testing::TimeHelpers
 
-  shared_examples "a cached remote value" do |remote_source: nil, ttl: nil|
-    let(:remote_responses) { [] }
-    let(:stored_datas) { remote_responses }
+  shared_examples "a cached value reader" do |key: nil|
+    context "when there is no data in the cache" do
+      before { redis.set("#{key}:etag", "unused") }
 
-    before do
-      freeze_time
-      allow(GtfsCache::Remote).to receive_messages(gtfs_schedule: nil,
-                                                   gtfs_realtime_alerts: nil,
-                                                   gtfs_realtime_trip_updates: nil)
-      allow(GtfsCache::Remote).to receive(remote_source).and_return(*(remote_responses + [nil]))
-    end
-
-    context "when called initially" do
       it "returns nil" do
         expect(subject).to be_nil
       end
     end
 
-    context "when called after an update check with no existing data" do
-      before { described_class.check_for_updates }
+    context "when there is data but no control information in the cache" do
+      before { redis.set("#{key}:data", "cached data") }
 
-      it "returns freshly fetched data" do
-        expect(subject).to have_attributes(data: stored_datas.first, expires: ttl.from_now)
+      it "returns the data with control information missing" do
+        expect(subject).to have_attributes(data: "cached data", etag: nil, time: nil, expires: nil)
       end
     end
 
-    context "when called after an update check with fresh data" do
+    context "when there is data and control information in the cache" do
       before do
-        described_class.check_for_updates
-        travel ttl
-        described_class.check_for_updates
+        freeze_time
+        redis.set("#{key}:data", "cached data")
+        redis.set("#{key}:etag", "etag")
+        redis.set("#{key}:time", Time.current.to_i)
+        redis.set("#{key}:expires", 10.seconds.from_now.to_i)
       end
 
-      it "returns the still fresh data" do
-        expect(subject).to have_attributes(data: stored_datas.first, expires: Time.current)
+      it "returns the data and parsed control information" do
+        expect(subject).to have_attributes(
+          data: "cached data", etag: "etag", time: Time.current, expires: 10.seconds.from_now
+        )
+      end
+    end
+  end
+
+  shared_examples "a cached value writer" do |key: nil, ttl: nil|
+    def cache_keys = ["#{key}:data", "#{key}:etag", "#{key}:time", "#{key}:expires"]
+
+    def new_values = redis.mget(*cache_keys)
+
+    let(:data) { response_body }
+
+    before do
+      freeze_time
+      stub_request(:get, request_url)
+        .tap { |stub| stub.with(headers: request_headers) if defined?(request_headers) }
+        .to_return(status: response_status, body: response_body)
+      redis.mset(*cache_keys.zip(old_values).flatten)
+    end
+
+    context "when nothing is cached" do
+      let(:old_values) { [nil, nil, nil, nil] }
+      let(:response_status) { 200 }
+
+      it "updates the cache" do
+        subject
+        expect(new_values).to eq([data,
+                                  Digest::MD5.hexdigest(data),
+                                  Time.current.to_i.to_s,
+                                  ttl.after(Time.current).to_i.to_s])
       end
     end
 
-    context "when called after an update check with stale data" do
-      before do
-        described_class.check_for_updates
-        travel ttl
-        described_class.check_for_updates
-        travel 1.second
-        described_class.check_for_updates
-      end
+    context "when fresh data is cached" do
+      let(:old_values) { ["old data", "etag", 1.day.ago.to_i, Time.current.to_i] }
+      let(:response_status) { 200 }
 
-      it "returns freshly fetched data" do
-        expect(subject).to have_attributes(data: stored_datas.second, expires: ttl.from_now)
+      it "does not update the cache" do
+        subject
+        expect(new_values).to eq(old_values)
       end
     end
 
-    context "when called after an update check with stale data that failed" do
-      before do
-        described_class.check_for_updates
-        travel ttl
-        described_class.check_for_updates
-        travel 1.second
-        described_class.check_for_updates
-        travel ttl + 1.second
-        described_class.check_for_updates
-      end
+    context "when stale data is cached" do
+      let(:old_values) { ["old data", "etag", 1.day.ago.to_i, 1.second.ago.to_i] }
+      let(:response_status) { 200 }
 
-      it "returns stale data" do
-        expect(subject).to have_attributes(data: stored_datas.second, expires: 1.second.ago)
+      it "updates the cache" do
+        subject
+        expect(new_values).to eq([data,
+                                  Digest::MD5.hexdigest(data),
+                                  Time.current.to_i.to_s,
+                                  ttl.after(Time.current).to_i.to_s])
+      end
+    end
+
+    context "when stale data is cached and the remote responds with an error" do
+      let(:old_values) { ["old data", "etag", 1.day.ago.to_i, 1.second.ago.to_i] }
+      let(:response_status) { 500 }
+
+      it "does not update the cache" do
+        subject
+        expect(new_values).to eq(old_values)
       end
     end
   end
 
   describe ".gtfs_schedule" do
-    subject(:call) { described_class.gtfs_schedule }
+    subject { described_class.gtfs_schedule }
 
-    it_behaves_like "a cached remote value", remote_source: :gtfs_schedule, ttl: 1.day do
-      let(:remote_responses) { [file_fixture("schedule1.zip").read, file_fixture("schedule2.zip").read] }
-    end
+    it_behaves_like "a cached value reader", key: "gtfs_schedule"
   end
 
   describe ".gtfs_schedule_routes" do
-    subject(:call) { described_class.gtfs_schedule_routes }
+    subject { described_class.gtfs_schedule_routes }
 
-    it_behaves_like "a cached remote value", remote_source: :gtfs_schedule, ttl: 1.day do
-      let(:remote_responses) { [file_fixture("schedule1.zip").read, file_fixture("schedule2.zip").read] }
-      let(:stored_datas) do
-        [file_fixture("schedule1/routes.txt").read, file_fixture("schedule2/routes.txt").read]
-      end
-    end
+    it_behaves_like "a cached value reader", key: "gtfs_schedule_routes"
   end
 
   describe ".gtfs_realtime_alerts" do
-    subject(:call) { described_class.gtfs_realtime_alerts }
+    subject { described_class.gtfs_realtime_alerts }
 
-    it_behaves_like "a cached remote value", remote_source: :gtfs_realtime_alerts, ttl: 10.seconds do
-      let(:remote_responses) { ["protobuf data 1", "protobuf data 2"] }
-    end
+    it_behaves_like "a cached value reader", key: "gtfs_realtime_alerts"
   end
 
   describe ".gtfs_realtime_trip_updates" do
-    subject(:call) { described_class.gtfs_realtime_trip_updates }
+    subject { described_class.gtfs_realtime_trip_updates }
 
-    it_behaves_like "a cached remote value", remote_source: :gtfs_realtime_trip_updates, ttl: 10.seconds do
-      let(:remote_responses) { ["protobuf data 1", "protobuf data 2"] }
+    it_behaves_like "a cached value reader", key: "gtfs_realtime_trip_updates"
+  end
+
+  describe ".check_for_updates" do
+    subject { described_class.check_for_updates }
+
+    it_behaves_like "a cached value writer", key: "gtfs_schedule", ttl: 1.day do
+      let(:request_url) { "https://www.pvta.com/g_trans/google_transit.zip" }
+      let(:request_headers) { nil }
+      let(:response_body) { file_fixture("schedule1.zip").read }
     end
   end
 end

@@ -20,6 +20,8 @@ module GtfsCache
 
       private
 
+      def remote = Remote.new
+
       def redis
         @redis ||= ConnectionPool.new(size: 5) do
           redis = if ENV.fetch("RACK_ENV", "development") == "development"
@@ -59,7 +61,7 @@ module GtfsCache
       end
 
       def update_gtfs_schedule
-        Remote.gtfs_schedule&.then do |data|
+        remote.gtfs_schedule&.then do |data|
           time = Time.current
           write(:gtfs_schedule, data, time:, expires_in: 1.day)
           Zip::File.open_buffer(data) do |zip|
@@ -69,13 +71,13 @@ module GtfsCache
       end
 
       def update_gtfs_realtime_alerts
-        Remote.gtfs_realtime_alerts&.then do |data|
+        remote.gtfs_realtime_alerts&.then do |data|
           write(:gtfs_realtime_alerts, data, expires_in: 10.seconds)
         end
       end
 
       def update_gtfs_realtime_trip_updates
-        Remote.gtfs_realtime_trip_updates&.then do |data|
+        remote.gtfs_realtime_trip_updates&.then do |data|
           write(:gtfs_realtime_trip_updates, data, expires_in: 10.seconds)
         end
       end
