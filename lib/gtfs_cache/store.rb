@@ -13,7 +13,7 @@ module GtfsCache
       def gtfs_realtime_trip_updates = read(:gtfs_realtime_trip_updates)
 
       def check_for_updates
-        update_gtfs_schedule unless read(:gtfs_schedule)&.fresh?
+        update_gtfs_schedule unless read(:gtfs_schedule)&.fresh? && read(:gtfs_schedule_routes)&.fresh?
         update_gtfs_realtime_alerts unless read(:gtfs_realtime_alerts)&.fresh?
         update_gtfs_realtime_trip_updates unless read(:gtfs_realtime_trip_updates)&.fresh?
       end
@@ -54,7 +54,9 @@ module GtfsCache
       def update_gtfs_schedule
         Remote.gtfs_schedule&.then do |data|
           expires = 1.day.from_now
-          write(:gtfs_schedule, data, expires:)
+          write(:gtfs_schedule, data, expires:) unless read(:gtfs_schedule)&.fresh?
+          return if read(:gtfs_schedule_routes)&.fresh?
+
           Zip::File.open_buffer(data) do |zip_file|
             write(:gtfs_schedule_routes, zip_file.find_entry("routes.txt").get_input_stream.read, expires:)
           end
