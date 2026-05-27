@@ -13,9 +13,9 @@ module GtfsCache
       def gtfs_realtime_trip_updates = read(:gtfs_realtime_trip_updates)
 
       def check_for_updates
-        update_gtfs_schedule unless read(:gtfs_schedule)&.fresh? && read(:gtfs_schedule_routes)&.fresh?
-        update_gtfs_realtime_alerts unless read(:gtfs_realtime_alerts)&.fresh?
-        update_gtfs_realtime_trip_updates unless read(:gtfs_realtime_trip_updates)&.fresh?
+        check_gtfs_schedule
+        check_gtfs_realtime_alerts
+        check_gtfs_realtime_trip_updates
       end
 
       private
@@ -51,7 +51,11 @@ module GtfsCache
         end
       end
 
-      def update_gtfs_schedule
+      def check_gtfs_schedule
+        # :nocov:
+        return if read(:gtfs_schedule)&.fresh? && read(:gtfs_schedule_routes)&.fresh?
+        # :nocov:
+
         Remote.gtfs_schedule&.then do |data|
           expires = 1.day.from_now
           write(:gtfs_schedule, data, expires:) unless read(:gtfs_schedule)&.fresh?
@@ -63,13 +67,17 @@ module GtfsCache
         end
       end
 
-      def update_gtfs_realtime_alerts
+      def check_gtfs_realtime_alerts
+        return if read(:gtfs_realtime_alerts)&.fresh?
+
         Remote.gtfs_realtime_alerts&.then do |data|
           write(:gtfs_realtime_alerts, data, expires: 10.seconds.from_now)
         end
       end
 
-      def update_gtfs_realtime_trip_updates
+      def check_gtfs_realtime_trip_updates
+        return if read(:gtfs_realtime_trip_updates)&.fresh?
+
         Remote.gtfs_realtime_trip_updates&.then do |data|
           write(:gtfs_realtime_trip_updates, data, expires: 10.seconds.from_now)
         end
