@@ -142,6 +142,14 @@ RSpec.describe GtfsCache::Store do
       let(:local_data) { file_fixture("schedule1/routes.txt").read }
     end
 
+    it_behaves_like "it writes to the cache", key: "gtfs_schedule_routes", ttl: 1.day do
+      let(:request_stub) { stub_request(:get, "https://www.pvta.com/g_trans/google_transit.zip") }
+      let(:remote_data) { file_fixture("schedule1.zip").read }
+      let(:local_data) { file_fixture("schedule1/routes.txt").read }
+
+      before { redis.mset("gtfs_schedule:data", "some data", "gtfs_schedule:expires", 1.day.from_now.to_i) }
+    end
+
     it_behaves_like "it writes to the cache", key: "gtfs_realtime_alerts", ttl: 10.seconds do
       let(:request_stub) do
         stub_request(:get, "https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-alerts/v2")
