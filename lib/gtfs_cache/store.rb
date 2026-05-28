@@ -52,16 +52,20 @@ module GtfsCache
       end
 
       def check_gtfs_schedule
-        return if read(:gtfs_schedule)&.fresh? && read(:gtfs_schedule_routes)&.fresh?
+        return if %i[gtfs_schedule gtfs_schedule_routes].map { |key| read(key)&.fresh? }.all?
 
         Remote.gtfs_schedule&.then do |data|
           expires = 1.day.from_now
           write(:gtfs_schedule, data, expires:) unless read(:gtfs_schedule)&.fresh?
-          return if read(:gtfs_schedule_routes)&.fresh?
+          check_gtfs_schedule_subfiles(data, expires)
+        end
+      end
 
-          Zip::File.open_buffer(data) do |zip_file|
-            write(:gtfs_schedule_routes, zip_file.find_entry("routes.txt").get_input_stream.read, expires:)
-          end
+      def check_gtfs_schedule_subfiles(data, expires)
+        return if read(:gtfs_schedule_routes)&.fresh?
+
+        Zip::File.open_buffer(data) do |zip_file|
+          write(:gtfs_schedule_routes, zip_file.find_entry("routes.txt").get_input_stream.read, expires:)
         end
       end
 
