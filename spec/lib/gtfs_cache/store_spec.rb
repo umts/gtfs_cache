@@ -124,7 +124,7 @@ RSpec.describe GtfsCache::Store do
   end
 
   describe ".check_for_updates" do
-    subject { described_class.check_for_updates }
+    subject(:call) { described_class.check_for_updates }
 
     before do
       allow(CREDENTIALS).to receive(:swiftly_api_key).and_return("test-swiftly-api-key")
@@ -156,6 +156,20 @@ RSpec.describe GtfsCache::Store do
           .with(headers: { "Authorization" => "test-swiftly-api-key" })
       end
       let(:remote_data) { "protobuf data" }
+    end
+
+    context "when everything is fresh" do
+      before do
+        redis.mset "gtfs_schedule:data", "fresh", "gtfs_schedule:expires", Time.current.to_i,
+                   "gtfs_schedule_routes:data", "fresh", "gtfs_schedule_routes:expires", Time.current.to_i,
+                   "gtfs_realtime_alerts:data", "fresh", "gtfs_realtime_alerts:expires", Time.current.to_i,
+                   "gtfs_realtime_trip_updates:data", "fresh", "gtfs_realtime_trip_updates:expires", Time.current.to_i
+      end
+
+      it "does not make any requests" do
+        call
+        expect(a_request(:get, /.*/)).not_to have_been_requested
+      end
     end
   end
 end

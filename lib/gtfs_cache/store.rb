@@ -52,9 +52,7 @@ module GtfsCache
       end
 
       def check_gtfs_schedule
-        # :nocov:
         return if read(:gtfs_schedule)&.fresh? && read(:gtfs_schedule_routes)&.fresh?
-        # :nocov:
 
         Remote.gtfs_schedule&.then do |data|
           expires = 1.day.from_now
