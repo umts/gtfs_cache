@@ -29,13 +29,12 @@ pipeline {
         }
       }
       environment {
-        KAMAL_SSH_USER = 'jenkins'
-        KAMAL_SSH_KEY = credentials('umts-jenkins-ssh')
+        JENKINS_SSH_CREDS = credentials('umts-jenkins-ssh')
       }
       steps {
         sh 'bundle install'
         sh 'docker build --tag gtfs_cache --build-arg RUBY_VERSION="${RUBY_VERSION}" .'
-        sh 'bundle exec kamal details'
+        echo '$JENKINS_SSH_CREDS'
       }
     }
   }
