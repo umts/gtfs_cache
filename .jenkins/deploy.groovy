@@ -12,7 +12,10 @@ pipeline {
         checkout scm
         script {
           env.RUBY_VERSION = readFile('.ruby-version').trim()
-          docker.build("umts/kamal:${env.RUBY_VERSION}", "--build-arg RUBY_VERSION=${env.RUBY_VERSION} ./.jenkins")
+          docker.build(
+            "umts/kamal:${env.RUBY_VERSION}",
+            "--build-arg RUBY_VERSION=${env.RUBY_VERSION} ./.jenkins/kamal.dockerfile"
+          )
         }
       }
     }
