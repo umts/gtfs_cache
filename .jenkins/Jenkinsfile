@@ -26,8 +26,6 @@ pipeline {
         }
       }
       steps {
-        sh 'git config --local user.name "Jenkins"'
-        sh 'git config --local user.email "jenkins@umass.edu"'
         sh 'bundle install'
         sh 'bundle exec kamal help'
         sh "docker build --tag gtfs_cache --build-arg RUBY_VERSION=${env.RUBY_VERSION} ."
