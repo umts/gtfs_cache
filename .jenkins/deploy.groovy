@@ -14,7 +14,7 @@ pipeline {
           env.RUBY_VERSION = readFile('.ruby-version').trim()
           docker.build(
             "umts/kamal:${env.RUBY_VERSION}",
-            "--file ./.jenkins/kamal.dockerfile --build-arg RUBY_VERSION=${env.RUBY_VERSION}"
+            "--file ./.jenkins/kamal.dockerfile --build-arg RUBY_VERSION=${env.RUBY_VERSION} ."
           )
         }
       }
