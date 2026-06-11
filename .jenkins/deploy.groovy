@@ -31,7 +31,7 @@ pipeline {
       steps {
         sh 'bundle install'
         sh 'bundle exec kamal help'
-        sh "docker build --tag gtfs_cache --build-arg RUBY_VERSION=${env.RUBY_VERSION} ."
+        sh 'docker build --tag gtfs_cache --build-arg RUBY_VERSION="${RUBY_VERSION}" .'
       }
     }
   }
