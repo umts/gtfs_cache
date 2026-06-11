@@ -12,6 +12,7 @@ pipeline {
         checkout scm
         script {
           env.RUBY_VERSION = readFile('.ruby-version').trim()
+          docker.build("umts/kamal:${env.RUBY_VERSION}", "--build-arg RUBY_VERSION=${env.RUBY_VERSION} ./.jenkins")
         }
       }
     }
@@ -19,7 +20,8 @@ pipeline {
     stage('Deploy') {
       agent {
         docker {
-          image "ruby:${env.RUBY_VERSION}"
+          image "umts/kamal:${env.RUBY_VERSION}"
+          args '-v /var/run/docker.sock:/var/run/docker.sock'
           reuseNode true
         }
       }
