@@ -34,7 +34,7 @@ pipeline {
         withCredentials([sshUserPrivateKey(credentialsId: 'kamal-ssh',
                                            usernameVariable: 'KAMAL_SSH_USER',
                                            keyFileVariable: 'KAMAL_SSH_KEY_PATH')]) {
-          sh 'echo "$KAMAL_SSH_USER'
+          sh 'echo "$KAMAL_SSH_USER"'
           sh 'bundle exec kamal details'
         }
       }
