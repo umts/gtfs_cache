@@ -28,10 +28,14 @@ pipeline {
           reuseNode true
         }
       }
+      environment {
+        KAMAL_SSH_USER = 'jenkins'
+        KAMAL_SSH_KEY = credentials('umts-jenkins-ssh')
+      }
       steps {
         sh 'bundle install'
-        sh 'bundle exec kamal help'
         sh 'docker build --tag gtfs_cache --build-arg RUBY_VERSION="${RUBY_VERSION}" .'
+        sh 'bundle exec kamal details'
       }
     }
   }
