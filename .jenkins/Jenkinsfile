@@ -1,0 +1,35 @@
+pipeline {
+  agent none
+
+  options {
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('Fetch Code') {
+      agent any
+      steps {
+        checkout scm
+        script {
+          env.RUBY_VERSION = readFile('.ruby-version').trim()
+        }
+      }
+    }
+
+    stage('Deploy') {
+      agent {
+        docker {
+          image "ruby:${env.RUBY_VERSION}"
+          reuseNode true
+        }
+      }
+      steps {
+        sh 'git config --local user.name "Jenkins"'
+        sh 'git config --local user.email "jenkins@umass.edu"'
+        sh 'bundle install'
+        sh 'bundle exec kamal help'
+        sh "docker build --tag gtfs_cache --build-arg RUBY_VERSION=${env.RUBY_VERSION} ."
+      }
+    }
+  }
+}
