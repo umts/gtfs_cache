@@ -27,8 +27,7 @@ env:
     - MASTER_KEY
 ssh:
   user: <%= ENV.fetch('KAMAL_SSH_USER', user_for('afs-umts-web4.admin.umass.edu')) %>
-  keys:
-    - KAMAL_SSH_KEY_PATH
+  keys: [<%= ENV.fetch('KAMAL_SSH_KEY_PATH', nil)>]
 volumes:
   - "gtfs_cache_log:/app/log"
 accessories:

@@ -28,13 +28,15 @@ pipeline {
           reuseNode true
         }
       }
-      environment {
-        JENKINS_SSH_CREDS = credentials('umts-jenkins-ssh')
-      }
       steps {
         sh 'bundle install'
         sh 'docker build --tag gtfs_cache --build-arg RUBY_VERSION="${RUBY_VERSION}" .'
-        echo '$JENKINS_SSH_CREDS'
+        withCredentials([sshUserPrivateKey(credentialsId: 'kamal-ssh',
+                                           usernameVariable: 'KAMAL_SSH_USER',
+                                           keyFileVariable: 'KAMAL_SSH_KEY_PATH')]) {
+          sh 'echo "$KAMAL_SSH_USER'
+          sh 'bundle exec kamal details'
+        }
       }
     }
   }
