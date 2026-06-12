@@ -8,7 +8,7 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     env:
-      HOST: https://jenkins.umass.edu
+      HOST: jenkins.umass.edu
       WEBHOOK_PATH: /github-webhook/
       API_PATH: /api/json
       CRUMB_PATH: /crumbIssuer/api/json
