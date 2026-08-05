@@ -20,8 +20,6 @@ registry:
   server: localhost:5555
 builder:
   arch: amd64
-  args:
-    RUBY_VERSION: <%= project_root.join('.ruby-version').read.strip %>
 env:
   secret:
     - MASTER_KEY
