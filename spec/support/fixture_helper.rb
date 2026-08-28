@@ -1,5 +1,3 @@
-require "pathname"
-
 module FixtureHelper
   extend ActiveSupport::Concern
 
