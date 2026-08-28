@@ -1,5 +1,5 @@
 source "https://rubygems.org"
-ruby "3.4.9"
+ruby "3.4.10"
 
 gem "activesupport", require: "active_support/all"
 gem "puma", require: false
