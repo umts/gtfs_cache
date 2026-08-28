@@ -5,7 +5,7 @@
 # docker build --tag gtfs_cache .
 # docker run --interactive --tty --publish 80:80 --env MASTER_KEY="$(cat config/gtfs_cache.key)" gtfs_cache
 
-FROM ruby:3.4.9-slim@sha256:c2637069aa39420c6f4f2638fc6c7dbcf35fc5a85263a0ef00d823f34e2a589e AS base
+FROM ruby:4.0.6-slim@sha256:58479f164d5947f852da27a4436c89bb986a811f959c40552bc7f6ccaabcc9c9 AS base
 
 # App lives here
 WORKDIR /app
