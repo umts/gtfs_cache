@@ -1,7 +1,7 @@
 require "gtfs_cache/store"
 require "puma/plugin/gtfs_cache_warmer"
 
-# rubocop:disable RSpec/MultipleExpectations
+# rubocop:disable-next RSpec/MultipleExpectations
 RSpec.describe Puma::Plugin::GtfsCacheWarmer do
   describe "#start" do
     subject(:call) { plugin.start(nil) }
@@ -42,4 +42,3 @@ RSpec.describe Puma::Plugin::GtfsCacheWarmer do
     end
   end
 end
-# rubocop:enable RSpec/MultipleExpectations
