@@ -1,11 +1,11 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 # check=error=true
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
 # docker build --tag gtfs_cache .
 # docker run --interactive --tty --publish 80:80 --env MASTER_KEY="$(cat config/gtfs_cache.key)" gtfs_cache
 
-FROM ruby:3.4.9-slim AS base
+FROM ruby:3.4.9-slim@sha256:c2637069aa39420c6f4f2638fc6c7dbcf35fc5a85263a0ef00d823f34e2a589e AS base
 
 # App lives here
 WORKDIR /app
