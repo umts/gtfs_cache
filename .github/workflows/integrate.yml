@@ -3,10 +3,10 @@ on:
 jobs:
   docker:
     name: app
-    uses: umts/.github/.github/workflows/docker.yml@main
+    uses: umts/shared-workflows/.github/workflows/docker.yml@15c71ed09491317e4eee2a082634b70a245b5651
   rspec:
     name: app
-    uses: umts/.github/.github/workflows/rspec.yml@main
+    uses: umts/shared-workflows/.github/workflows/rspec.yml@15c71ed09491317e4eee2a082634b70a245b5651
   rubocop:
     name: app
-    uses: umts/.github/.github/workflows/rubocop.yml@main
+    uses: umts/shared-workflows/.github/workflows/rubocop.yml@15c71ed09491317e4eee2a082634b70a245b5651
