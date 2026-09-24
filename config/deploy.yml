@@ -1,22 +1,27 @@
-<%
-  def user_for(host)
-    Net::SSH::Config.for(host).fetch(:user, ENV.fetch('USER', nil))
-  end
-%>
+# <% def user_for(host) = Net::SSH::Config.for(host).fetch(:user, ENV.fetch('USER', nil)) %>
 
 service: gtfs_cache
 image: umts/gtfs_cache
+registry:
+  server: ghcr.io
+  username: not_needed
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+builder:
+  arch: amd64
+  provenance: false
+  sbom: false
+labels:
+  org.opencontainers.image.source: "https://github.com/umts/gtfs_cache"
 servers:
   web:
     - afs-umts-web4.admin.umass.edu
 proxy:
   ssl: true
   host: gtfs-cache.admin.umass.edu
-registry:
-  server: localhost:5555
-builder:
-  arch: amd64
 env:
+  clear:
+    TZ: America/New_York
   secret:
     - MASTER_KEY
 ssh:

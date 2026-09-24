@@ -8,3 +8,9 @@ on:
 jobs:
   integrate:
     uses: ./.github/workflows/integrate.yml
+  deploy:
+    needs: integrate
+    permissions:
+      contents: read
+      packages: write
+    uses: umts/shared-workflows/.github/workflows/ghcr-kamal.yml@main
