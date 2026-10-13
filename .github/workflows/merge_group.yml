@@ -1,0 +1,8 @@
+name: merge_group
+permissions:
+  contents: read
+on:
+  merge_group:
+jobs:
+  integrate:
+    uses: ./.github/workflows/integrate.yml
