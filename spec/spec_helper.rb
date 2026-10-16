@@ -1,7 +1,7 @@
 require "simplecov"
 SimpleCov.start do
   load_profile "test_frameworks"
-  track_files "lib/**/*.rb"
+  cover "lib/**/*.rb"
   enable_coverage :branch
   minimum_coverage line: 100, branch: 100
 end

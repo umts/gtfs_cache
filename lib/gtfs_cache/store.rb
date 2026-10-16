@@ -23,9 +23,9 @@ module GtfsCache
       def redis
         @redis ||= ConnectionPool.new(size: 5) do
           redis = if ENV.fetch("RACK_ENV", "development") == "development"
-                    # :nocov:
+                    # simplecov:disable
                     MockRedis.new
-                    # :nocov:
+                    # simplecov:enable
                   else
                     Redis.new(url: "redis://gtfs_cache-redis:6379/0")
                   end
