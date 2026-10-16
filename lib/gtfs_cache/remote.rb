@@ -24,9 +24,9 @@ module GtfsCache
 
       def swiftly_base_url
         if ENV.fetch("RACK_ENV", "development") == "development"
-          # :nocov:
+          # simplecov:disable
           "https://api.goswift.ly/real-time/pioneer-valley-pvta-sandbox"
-          # :nocov:
+          # simplecov:enable
         else
           "https://api.goswift.ly/real-time/pioneer-valley-pvta"
         end
