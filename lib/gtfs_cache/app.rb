@@ -1,10 +1,8 @@
-require_relative "error_notifier"
 require_relative "logger"
 require_relative "store"
 
 module GtfsCache
   class App < Sinatra::Base
-    register ErrorNotifier
     register Logger
 
     helpers do
