@@ -11,6 +11,10 @@ gem "redis-namespace"
 gem "rubyzip", require: "zip"
 gem "sinatra", require: "sinatra/base"
 
+group :production do
+  gem "mail"
+end
+
 group :development do
   gem "kamal", require: false
   gem "railties", require: false

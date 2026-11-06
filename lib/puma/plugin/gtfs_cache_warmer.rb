@@ -9,7 +9,7 @@ module Puma
           loop do
             GtfsCache::Store.check_for_updates
           rescue StandardError => e
-            e
+            GtfsCache::ErrorNotifier.notify!(e)
           ensure
             sleep 1
           end
