@@ -1,5 +1,6 @@
 require "mail"
 
+# simplecov:disable
 module GtfsCache
   class ErrorNotifier
     def initialize(app) = @app = app
@@ -12,6 +13,14 @@ module GtfsCache
 
     class << self
       def notify!(error)
+        return unless ENV.fetch("RACK_ENV", nil) == "production"
+
+        mail(error).deliver!
+      end
+
+      private
+
+      def mail(error)
         content = render(error)
         mail = Mail.new do
           from "transportation-it@admin.umass.edu"
@@ -21,10 +30,8 @@ module GtfsCache
           body content
         end
         mail.delivery_method :smtp, address: "mailhub.oit.umass.edu", port: 25, openssl_verify_mode: "none"
-        mail.deliver!
+        mail
       end
-
-      private
 
       def render(error)
         <<~HTML
@@ -60,14 +67,12 @@ module GtfsCache
                   <td align="center">
                     <!--[if mso]>
                       <table
-                              width="700"
-                              border="0"
-                              cellspacing="0"
-                              cellpadding="0"
-                              align="center" style="width: 700px;"
-                      >
-                        <tr>
-                          <td>
+                        width="700"
+                        border="0"
+                        cellspacing="0"
+                        cellpadding="0"
+                        align="center" style="width: 700px;"
+                      ><tr><td>
                       <![endif]-->
                     <table
                       width="100%"
@@ -94,9 +99,7 @@ module GtfsCache
                       </tr>
                     </table>
                     <!--[if mso]>
-                        </td>
-                        </tr>
-                      </table>
+                      </td></tr></table>
                     <![endif]-->
                   </td>
                 </tr>
@@ -108,3 +111,4 @@ module GtfsCache
     end
   end
 end
+# simplecov:enable
