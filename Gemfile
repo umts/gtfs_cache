@@ -2,6 +2,7 @@ source "https://rubygems.org"
 ruby "4.0.9"
 
 gem "activesupport", require: "active_support/all"
+gem "mail"
 gem "puma", require: false
 gem "rack"
 gem "rake"

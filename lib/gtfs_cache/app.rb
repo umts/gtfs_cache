@@ -1,8 +1,10 @@
-require_relative "store"
+require_relative "error_notifier"
 require_relative "logger"
+require_relative "store"
 
 module GtfsCache
   class App < Sinatra::Base
+    register ErrorNotifier
     register Logger
 
     helpers do
@@ -19,6 +21,7 @@ module GtfsCache
     end
 
     get "/gtfs(.zip)?" do
+      raise 'This is my runtime error'
       serve_entry Store.gtfs_schedule, "application/zip"
     end
 
