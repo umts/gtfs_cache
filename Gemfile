@@ -2,6 +2,7 @@ source "https://rubygems.org"
 ruby "4.0.9"
 
 gem "activesupport", require: "active_support/all"
+gem "irb", require: false
 gem "puma", require: false
 gem "rack"
 gem "rake"
@@ -11,7 +12,6 @@ gem "rubyzip", require: "zip"
 gem "sinatra", require: "sinatra/base"
 
 group :development do
-  gem "irb", require: false
   gem "kamal", require: false
   gem "railties", require: false
   gem "rubocop", require: false
