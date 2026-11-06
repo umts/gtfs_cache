@@ -1,5 +1,3 @@
-require "mail"
-
 # simplecov:disable
 module GtfsCache
   class ErrorNotifier
@@ -24,7 +22,7 @@ module GtfsCache
         content = render(error)
         mail = Mail.new do
           from "transportation-it@admin.umass.edu"
-          to "bmelz@umass.edu"
+          to "programmers@admin.umass.edu"
           subject "#{error.class} from gtfs-cache"
           content_type "text/html; charset=UTF-8"
           body content

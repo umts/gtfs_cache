@@ -2,7 +2,6 @@ source "https://rubygems.org"
 ruby "4.0.9"
 
 gem "activesupport", require: "active_support/all"
-gem "mail"
 gem "puma", require: false
 gem "rack"
 gem "rake"
@@ -10,6 +9,10 @@ gem "redis"
 gem "redis-namespace"
 gem "rubyzip", require: "zip"
 gem "sinatra", require: "sinatra/base"
+
+group :production do
+  gem "mail"
+end
 
 group :development do
   gem "irb", require: false
