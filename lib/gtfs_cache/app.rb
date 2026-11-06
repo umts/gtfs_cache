@@ -1,5 +1,5 @@
-require_relative "store"
 require_relative "logger"
+require_relative "store"
 
 module GtfsCache
   class App < Sinatra::Base
