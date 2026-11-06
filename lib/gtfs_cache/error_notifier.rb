@@ -1,4 +1,4 @@
-require 'mail'
+require "mail"
 
 module GtfsCache
   class ErrorNotifier
@@ -6,7 +6,7 @@ module GtfsCache
 
     def call(env)
       @app.call(env).tap do
-        env['sinatra.error']&.then { |error| self.class.notify!(error) }
+        env["sinatra.error"]&.then { |error| self.class.notify!(error) }
       end
     end
 
@@ -14,13 +14,13 @@ module GtfsCache
       def notify!(error)
         content = render(error)
         mail = Mail.new do
-          from 'transportation-it@admin.umass.edu'
-          to 'bmelz@umass.edu'
-          subject "gtfs-cache error (#{error.class})"
-          content_type 'text/html; charset=UTF-8'
+          from "transportation-it@admin.umass.edu"
+          to "bmelz@umass.edu"
+          subject "#{error.class} from gtfs-cache"
+          content_type "text/html; charset=UTF-8"
           body content
         end
-        mail.delivery_method :smtp, address: 'localhost', port: 1443, openssl_verify_mode: 'none'
+        mail.delivery_method :smtp, address: "mailhub.oit.umass.edu", port: 25, openssl_verify_mode: "none"
         mail.deliver!
       end
 
@@ -88,7 +88,7 @@ module GtfsCache
                           <div style="background-color: #212529; color: #fefefe; padding: 28px">
                             <h1 style="margin: 0">#{error.class}</h1>
                             <hr style="margin: 14px 0" />
-                            <pre style="margin: 0">#{error.backtrace&.join("\n") || 'None'}</pre>
+                            <pre style="margin: 0">#{error.backtrace&.join("\n") || "No backtrace given"}</pre>
                           </div>
                         </td>
                       </tr>

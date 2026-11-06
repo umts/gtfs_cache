@@ -19,7 +19,6 @@ module GtfsCache
     end
 
     get "/gtfs(.zip)?" do
-      raise 'This is my runtime error'
       serve_entry Store.gtfs_schedule, "application/zip"
     end
 
