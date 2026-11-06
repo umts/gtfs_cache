@@ -2,6 +2,7 @@ source "https://rubygems.org"
 ruby "4.0.9"
 
 gem "activesupport", require: "active_support/all"
+gem "irb", require: false
 gem "puma", require: false
 gem "rack"
 gem "rake"
@@ -15,7 +16,6 @@ group :production do
 end
 
 group :development do
-  gem "irb", require: false
   gem "kamal", require: false
   gem "railties", require: false
   gem "rubocop", require: false
