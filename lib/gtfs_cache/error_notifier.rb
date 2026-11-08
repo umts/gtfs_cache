@@ -2,6 +2,7 @@
 module GtfsCache
   class ErrorNotifier
     IGNORED = [Sinatra::NotFound].freeze
+    TEMPLATE = File.read(File.expand_path("error_template.txt", __dir__)).freeze
 
     def initialize(app) = @app = app
 
@@ -35,79 +36,7 @@ module GtfsCache
       end
 
       def render(error)
-        <<~HTML
-          <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office">
-            <head>
-              <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-              <meta name="viewport" content="width=device-width, initial-scale=1" />
-              <meta name="color-scheme" content="light dark" />
-              <meta name="supported-color-schemes" content="light dark" />
-              <style>
-                :root {
-                  color-scheme: light dark;
-                  supported-color-schemes: light dark;
-                }
-              </style>
-              <!--[if mso]>
-                <xml>
-                  <o:OfficeDocumentSettings>
-                    <o:PixelsPerInch>96</o:PixelsPerInch>
-                  </o:OfficeDocumentSettings>
-                </xml>
-              <![endif]-->
-            </head>
-            <body style="margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%">
-              <table
-                width="100%"
-                border="0"
-                cellspacing="0"
-                cellpadding="0"
-                style="border-collapse: collapse"
-              >
-                <tr>
-                  <td align="center">
-                    <!--[if mso]>
-                      <table
-                        width="700"
-                        border="0"
-                        cellspacing="0"
-                        cellpadding="0"
-                        align="center" style="width: 700px;"
-                      ><tr><td>
-                      <![endif]-->
-                    <table
-                      width="100%"
-                      border="0"
-                      cellspacing="0"
-                      cellpadding="0"
-                      style="
-                        width: 100%;
-                        margin: 0 auto;
-                        text-align: left;
-                        font-size: 14px;
-                        font-family: Arial, Helvetica, sans-serif;
-                        border-collapse: collapse;
-                      "
-                    >
-                      <tr>
-                        <td style="padding: 28px">
-                          <div style="background-color: #212529; color: #fefefe; padding: 28px">
-                            <h1 style="margin: 0">#{error.class}</h1>
-                            <hr style="margin: 14px 0" />
-                            <pre style="margin: 0">#{error.backtrace&.join("\n") || "No backtrace given"}</pre>
-                          </div>
-                        </td>
-                      </tr>
-                    </table>
-                    <!--[if mso]>
-                      </td></tr></table>
-                    <![endif]-->
-                  </td>
-                </tr>
-              </table>
-            </body>
-          </html>
-        HTML
+        format TEMPLATE, class: error.class, backtrace: error.backtrace&.join("\n") || "No backtrace given"
       end
     end
   end
