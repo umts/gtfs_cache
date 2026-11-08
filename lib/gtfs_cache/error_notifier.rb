@@ -1,6 +1,8 @@
 # simplecov:disable
 module GtfsCache
   class ErrorNotifier
+    IGNORED = [Sinatra::NotFound].freeze
+
     def initialize(app) = @app = app
 
     def call(env)
@@ -11,6 +13,7 @@ module GtfsCache
 
     class << self
       def notify!(error)
+        return if IGNORED.any? { error.is_a?(it) }
         return unless ENV.fetch("RACK_ENV", nil) == "production"
 
         mail(error).deliver!
