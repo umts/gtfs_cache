@@ -160,6 +160,7 @@ RSpec.describe GtfsCache::Store do
 
     context "when everything is fresh" do
       before do
+        freeze_time
         redis.mset "gtfs_schedule:data", "fresh", "gtfs_schedule:expires", Time.current.to_i,
                    "gtfs_schedule_routes:data", "fresh", "gtfs_schedule_routes:expires", Time.current.to_i,
                    "gtfs_realtime_alerts:data", "fresh", "gtfs_realtime_alerts:expires", Time.current.to_i,
